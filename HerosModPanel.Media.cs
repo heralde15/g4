@@ -226,7 +226,7 @@ internal static partial class HerosModPanel
 
         if (consoleBackgroundTexture != null && !consoleBackgroundTexture.IsDisposed)
             sb.Draw(consoleBackgroundTexture, panel,
-                Color.White * (Math.Clamp(consoleBackgroundOpacity, 10, 100) / 100f));
+                XnaColor.White * (Math.Clamp(consoleBackgroundOpacity, 10, 100) / 100f));
     }
 
     private static void UnloadConsoleBackground()
