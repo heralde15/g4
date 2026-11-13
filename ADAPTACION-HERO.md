@@ -33,3 +33,10 @@ No se pudo ejecutar `dotnet build` con este paquete porque el ZIP recibido no in
 - La función aumenta `tileRangeX` y `tileRangeY` del personaje local a 60 mientras está activa.
 - Los valores originales se guardan y se restauran al desactivar la función o cambiar de personaje; no modifica otros jugadores ni envía paquetes al servidor.
 - La adaptación se implementa en `HerosModPanel.AdaptedFeatures.cs` y se conecta al ciclo `UpdateLogic()` existente.
+
+
+## Tercera pasada: limpieza manual de proyectiles propios
+
+- Se adaptó la acción de referencia **Kill Owned Projectiles** sin depender del NetHelper externo.
+- El comando `.killprojs` (alias `.clearprojectiles`) elimina únicamente los proyectiles activos cuyo propietario es el jugador local.
+- Se añadió un botón manual en **Categorías > Utilidades**. No es automático y no afecta a proyectiles de otros jugadores.
