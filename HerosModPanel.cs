@@ -507,6 +507,7 @@ internal static partial class HerosModPanel
         godmodeEnabled = false;
         autoClearWorldItemsEnabled = false;
         autoClearWorldItemsTimer = 0;
+        autoKillHooksEnabled = false;
         npcShopFreeEnabled = false;
         luckBoostEnabled = false;
         ghostModeEnabled = false;
@@ -5328,6 +5329,7 @@ internal static partial class HerosModPanel
             ".mute" => "mute",
             ".shopfree" => "shopfree",
             ".autoclearitems" => "autoclearitems",
+            ".autokillhooks" => "autokillhooks",
             _ => string.Empty
         };
         if (directFeature.Length > 0)
@@ -5350,7 +5352,7 @@ internal static partial class HerosModPanel
                 break;
             case ".help":
             case ".ayuda":
-                commandConsoleOutput = ".helpall = lista completa · .toggle <función> [on/off] · atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems [on/off] · .hudpos <posición> · .buff <ID> [segundos] · .log [on/off] · .logall · .logworld · .logcombat · .logsystem · .lognpc · .logperformance · .logitems · .logfile · .logstatus · .logclear · .help2";
+                commandConsoleOutput = ".helpall = lista completa · .toggle <función> [on/off] · atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute  .shopfree .autoclearitems .autokillhooks [on/off] · .hudpos <posición> · .buff <ID> [segundos] · .log [on/off] · .logall · .logworld · .logcombat · .logsystem · .lognpc · .logperformance · .logitems · .logfile · .logstatus · .logclear · .help2";
                 break;
             case ".log":
             case ".eventlog":
@@ -5438,7 +5440,7 @@ internal static partial class HerosModPanel
                 break;
             case ".helpfeatures":
             case ".helpfunciones":
-                commandConsoleOutput = "TOGGLES: .toggle god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems [on/off]. Atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems [on/off] · acciones: .heal .debuffclear .killprojs .clearitems .revealmap · HUD: .hud [on/off] .hudpos 0-5 .hudinfo <categoria> [on/off]. La limpieza de objetos es solo en un jugador.";
+                commandConsoleOutput = "TOGGLES: .toggle god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems [on/off]. Atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems [on/off] · acciones: .heal .debuffclear .killprojs .clearitems .revealmap · hooks: .autokillhooks [on/off] · HUD: .hud [on/off] .hudpos 0-5 .hudinfo <categoria> [on/off]. La limpieza de objetos es solo en un jugador.";
                 break;
             case ".hudinfo":
                 {
@@ -5547,6 +5549,9 @@ internal static partial class HerosModPanel
                     switch (feature)
                     {
                         case "reach": extendedReachEnabled = ToggleFeature(extendedReachEnabled); ApplyExtendedReach(); break;
+                        case "autokillhooks":
+                            autoKillHooksEnabled = ToggleFeature(autoKillHooksEnabled);
+                            break;
                         case "autoclearitems":
                             if (Main.netMode != 0 && toggleRequestedState != false)
                             {
@@ -5618,6 +5623,7 @@ internal static partial class HerosModPanel
                             "god" => godmodeEnabled,
                             "reach" => extendedReachEnabled,
                             "autoclearitems" => autoClearWorldItemsEnabled,
+                            "autokillhooks" => autoKillHooksEnabled,
                             "nofall" => noFallDamageEnabled,
                             "noknockback" => noKnockbackEnabled,
                             "antidebuff" => antiDebuffEnabled,
