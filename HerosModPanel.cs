@@ -4887,7 +4887,7 @@ internal static partial class HerosModPanel
     // no en el mundo/servidor. Se persisten solo opciones explícitas, nunca estados temporales de UI.
     private static readonly string[] PersistentBooleanSettings =
     {
-        nameof(uiHighContrast), nameof(uiBackgroundEnabled), nameof(godmodeEnabled), nameof(adventureUnrestrictedEnabled), nameof(noSpawnsEnabled),
+        nameof(uiHighContrast), nameof(uiBackgroundEnabled), nameof(consoleBackgroundEnabled), nameof(godmodeEnabled), nameof(adventureUnrestrictedEnabled), nameof(noSpawnsEnabled),
         nameof(flyEnabled), nameof(infiniteMinionsEnabled), nameof(lifeLockEnabled),
         nameof(defenseOverrideEnabled), nameof(antiLagEnabled), nameof(antiLagProjectilesEnabled),
         nameof(fpsStabilizerEnabled), nameof(muteGameSoundsEnabled),
@@ -4926,6 +4926,10 @@ internal static partial class HerosModPanel
                         uiBackgroundImagePath = value;
                     else if (key == "uiBackgroundOpacity" && int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int opacity))
                         uiBackgroundOpacity = Math.Clamp(opacity, 10, 100);
+                    else if (key == "consoleBackgroundImagePath")
+                        consoleBackgroundImagePath = value;
+                    else if (key == "consoleBackgroundOpacity" && int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int consoleOpacity))
+                        consoleBackgroundOpacity = Math.Clamp(consoleOpacity, 10, 100);
                     else if (key == "defenseOverride" && int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int defense))
                         defenseOverride = Math.Clamp(defense, 0, 9999);
                     else if (key == "serverMode" && Enum.TryParse(value, true, out ServerMode loadedMode))
@@ -4968,6 +4972,8 @@ internal static partial class HerosModPanel
         lines.Add("uiTheme=" + uiTheme.ToString(CultureInfo.InvariantCulture));
         lines.Add("uiBackgroundImagePath=" + (uiBackgroundImagePath ?? string.Empty));
         lines.Add("uiBackgroundOpacity=" + uiBackgroundOpacity.ToString(CultureInfo.InvariantCulture));
+        lines.Add("consoleBackgroundImagePath=" + (consoleBackgroundImagePath ?? string.Empty));
+        lines.Add("consoleBackgroundOpacity=" + consoleBackgroundOpacity.ToString(CultureInfo.InvariantCulture));
         lines.Add("defenseOverride=" + defenseOverride.ToString(CultureInfo.InvariantCulture));
         lines.Add("serverMode=" + serverMode.ToString());
         lines.Add("soundVolumeBeforeMute=" + soundVolumeBeforeMute.ToString(CultureInfo.InvariantCulture));
@@ -5088,6 +5094,13 @@ internal static partial class HerosModPanel
         if (!uiBackgroundEnabled)
             return;
 
+        // Los GIF se decodifican en fotogramas independientes y se animan sin bloquear el hilo.
+        if (string.Equals(Path.GetExtension(uiBackgroundImagePath), ".gif", StringComparison.OrdinalIgnoreCase))
+        {
+            DrawAnimatedPanelBackground(sb, panel);
+            return;
+        }
+
         // Recarga el fondo desde la ruta guardada al iniciar una sesión nueva.
         if ((uiBackgroundTexture == null || uiBackgroundTexture.IsDisposed) &&
             !string.IsNullOrWhiteSpace(uiBackgroundImagePath))
@@ -5132,10 +5145,15 @@ internal static partial class HerosModPanel
             }
 
             string extension = Path.GetExtension(path).ToLowerInvariant();
+            if (extension == ".gif")
+            {
+                LoadAnimatedPanelBackground(path);
+                return;
+            }
             if (extension != ".png" && extension != ".jpg" && extension != ".jpeg")
             {
                 uiBackgroundEnabled = false;
-                uiBackgroundNotice = "Formato no compatible. Usa PNG o JPG.";
+                uiBackgroundNotice = "Formato no compatible. Usa PNG, JPG o GIF.";
                 SetStatus(uiBackgroundNotice);
                 return;
             }
@@ -5177,6 +5195,7 @@ internal static partial class HerosModPanel
         }
         catch { }
         uiBackgroundTexture = null;
+        UnloadAnimatedPanelBackground();
     }
 
     private static void DrawCustomizeTab(SpriteBatch sb, Texture2D pixel, Rectangle panel, ref int y, Point mouse)
@@ -5222,7 +5241,7 @@ internal static partial class HerosModPanel
         y += RowH + 12;
 
         DrawSectionHeader(sb, panel, ref y, "Imagen de fondo personalizada");
-        Utils.DrawBorderString(sb, "PNG o JPG · pega la ruta completa del archivo:", new Vector2(panel.X + Pad, y + 3), Color.LightGray, 0.62f);
+        Utils.DrawBorderString(sb, "PNG, JPG o GIF animado · pega la ruta completa del archivo:", new Vector2(panel.X + Pad, y + 3), Color.LightGray, 0.62f);
         y += 22;
         DrawTextField(sb, pixel, new Rectangle(panel.X + Pad, y, panel.Width - Pad * 2 - 132, 26), 70,
             uiBackgroundImagePath, mouse, @"C:\Users\pc\Pictures\hero-ui.png");
@@ -5257,6 +5276,46 @@ internal static partial class HerosModPanel
             uiBackgroundEnabled = false;
             uiBackgroundNotice = "Imagen eliminada de la interfaz.";
             SetStatus("Fondo personalizado quitado.");
+        }
+        y += 32;
+
+        DrawSectionHeader(sb, panel, ref y, "Fondo independiente de la consola");
+        Utils.DrawBorderString(sb, "PNG o JPG · no modifica el fondo del panel HERO:", new Vector2(panel.X + Pad, y + 3), Color.LightGray, 0.62f);
+        y += 22;
+        DrawTextField(sb, pixel, new Rectangle(panel.X + Pad, y, panel.Width - Pad * 2 - 132, 26), 71,
+            consoleBackgroundImagePath, mouse, @"C:\Users\pc\Pictures\hero-console.png");
+        if (DrawButton(sb, pixel, new Rectangle(panel.Right - Pad - 124, y, 124, 26), "Cargar imagen", mouse, new Color(45, 95, 125)))
+            LoadConsoleBackground();
+        y += 32;
+        if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad, y, 155, 25),
+            consoleBackgroundEnabled ? "Consola: ACTIVADA" : "Consola: desactivada", mouse,
+            consoleBackgroundEnabled ? UiAccent : UiTabColor))
+        {
+            consoleBackgroundEnabled = consoleBackgroundTexture != null && !consoleBackgroundEnabled;
+            SetStatus(consoleBackgroundEnabled ? "Fondo de consola activado." : "Fondo de consola desactivado.");
+            SaveSettingsIfChanged(true);
+        }
+        if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad + 163, y, 105, 25), "25%", mouse,
+            consoleBackgroundOpacity == 25 ? UiAccent : UiTabColor)) { consoleBackgroundOpacity = 25; SaveSettingsIfChanged(true); }
+        if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad + 274, y, 105, 25), "50%", mouse,
+            consoleBackgroundOpacity == 50 ? UiAccent : UiTabColor)) { consoleBackgroundOpacity = 50; SaveSettingsIfChanged(true); }
+        if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad + 385, y, 105, 25), "75%", mouse,
+            consoleBackgroundOpacity == 75 ? UiAccent : UiTabColor)) { consoleBackgroundOpacity = 75; SaveSettingsIfChanged(true); }
+        if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad + 496, y, 105, 25), "100%", mouse,
+            consoleBackgroundOpacity == 100 ? UiAccent : UiTabColor)) { consoleBackgroundOpacity = 100; SaveSettingsIfChanged(true); }
+        y += 30;
+        string consoleImageState = consoleBackgroundTexture == null ? consoleBackgroundNotice :
+            "Consola lista: " + Path.GetFileName(consoleBackgroundImagePath) + " · opacidad " + consoleBackgroundOpacity + "%";
+        Utils.DrawBorderString(sb, consoleImageState, new Vector2(panel.X + Pad, y), new Color(175, 205, 225), 0.60f);
+        y += 24;
+        if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad, y, 190, 24), "Quitar imagen de consola", mouse, new Color(105, 55, 58)))
+        {
+            UnloadConsoleBackground();
+            consoleBackgroundImagePath = string.Empty;
+            consoleBackgroundEnabled = false;
+            consoleBackgroundNotice = "Sin imagen personalizada para la consola.";
+            SetStatus("Fondo de consola quitado.");
+            SaveSettingsIfChanged(true);
         }
         y += 32;
 
@@ -5423,8 +5482,10 @@ internal static partial class HerosModPanel
         var panel = new Rectangle(x, y, width, height);
         Color accent = new Color(110, 220, 255);
         sb.Draw(pixel, panel, new Color(5, 8, 15, 248));
+        DrawConsoleCustomBackground(sb, panel);
         sb.Draw(pixel, new Rectangle(x, y, width, 3), accent);
-        sb.Draw(pixel, new Rectangle(x + 1, y + 1, width - 2, height - 2), new Color(17, 23, 36, 246));
+        sb.Draw(pixel, new Rectangle(x + 1, y + 1, width - 2, height - 2),
+            new Color(17, 23, 36, consoleBackgroundEnabled ? 166 : 246));
 
         Utils.DrawBorderString(sb, "H E R O  /  CONSOLA", new Vector2(x + 14, y + 10), accent, 0.82f);
         string mode = Main.gameMenu ? "MENÚ PRINCIPAL" : Main.netMode == 1 ? "MULTIJUGADOR" : "UN JUGADOR";
