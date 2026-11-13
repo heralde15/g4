@@ -5327,6 +5327,7 @@ internal static partial class HerosModPanel
             ".fps" => "fps",
             ".mute" => "mute",
             ".shopfree" => "shopfree",
+            ".autoclearitems" => "autoclearitems",
             _ => string.Empty
         };
         if (directFeature.Length > 0)
