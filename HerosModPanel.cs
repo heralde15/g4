@@ -512,7 +512,7 @@ internal static partial class HerosModPanel
         noSpawnsEnabled = false;
         flyEnabled = false;
         radialProjectileMode = false;
-        infiniteMinionsEnabled = false;
+        SetInfiniteMinions(false);
         lifeLockEnabled = false;
         defenseOverrideEnabled = false;
         antiLagEnabled = false;
@@ -643,8 +643,7 @@ internal static partial class HerosModPanel
 
         // Multiplica proyectiles nuevos del arma equipada una sola vez por identidad.
         ApplyProjectileMultiplier(local);
-        if (infiniteMinionsEnabled && local.active && !local.dead)
-            local.maxMinions = 9999;
+        ApplyInfiniteMinions();
         if (lifeLockEnabled && local.active && !local.dead && !IsServer)
         {
             local.statLife = Math.Max(1, local.statLifeMax2);
@@ -1664,8 +1663,7 @@ internal static partial class HerosModPanel
         int extraToggleW = (Width - Pad * 2 - 8) / 2;
         if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad + extraToggleW + 8, y, extraToggleW, RowH), infiniteMinionsEnabled ? "Minions infinitos: ACTIVADO" : "Minions infinitos: desactivado", mouse, infiniteMinionsEnabled ? new Color(40, 115, 75) : UiTabColor))
         {
-            infiniteMinionsEnabled = !infiniteMinionsEnabled;
-            if (infiniteMinionsEnabled) Main.LocalPlayer.maxMinions = 9999;
+            SetInfiniteMinions(!infiniteMinionsEnabled);
             SetStatus(infiniteMinionsEnabled ? "Límite local de minions elevado; el servidor puede rechazarlo." : "Minions infinitos desactivados.");
         }
         y += RowH + 6;
@@ -5543,10 +5541,7 @@ internal static partial class HerosModPanel
                             ghostModeEnabled = ToggleFeature(ghostModeEnabled);
                             if (Main.LocalPlayer != null && Main.LocalPlayer.active) Main.LocalPlayer.ghost = ghostModeEnabled;
                             break;
-                        case "minions":
-                            infiniteMinionsEnabled = ToggleFeature(infiniteMinionsEnabled);
-                            if (Main.LocalPlayer != null && Main.LocalPlayer.active && infiniteMinionsEnabled) Main.LocalPlayer.maxMinions = 9999;
-                            break;
+                        case "minions": SetInfiniteMinions(ToggleFeature(infiniteMinionsEnabled)); break;
                         case "lifelock":
                             if (IsServer && toggleRequestedState != false && !lifeLockEnabled)
                             {
@@ -5654,9 +5649,7 @@ internal static partial class HerosModPanel
                     (Main.netMode == 1 ? " El servidor puede corregirlo." : string.Empty);
                 break;
             case ".minions":
-                infiniteMinionsEnabled = Toggle(infiniteMinionsEnabled);
-                if (Main.LocalPlayer != null && Main.LocalPlayer.active && infiniteMinionsEnabled)
-                    Main.LocalPlayer.maxMinions = 9999;
+                SetInfiniteMinions(Toggle(infiniteMinionsEnabled));
                 commandConsoleOutput = "Límite local de minions " + (infiniteMinionsEnabled ? "elevado." : "restauración desactivada.") +
                     (Main.netMode == 1 ? " El servidor puede rechazarlo." : string.Empty);
                 break;
