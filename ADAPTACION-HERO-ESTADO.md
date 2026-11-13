@@ -31,6 +31,9 @@ Este documento distingue las funciones realmente conectadas a la UI/consola de l
 - Curar vida/maná y limpiar debuffs.
 - Consultas de posición, inventario, jugadores, estado e informes.
 
+### Combate
+- Sin i-frames del personaje local: reduce `immuneTime` y desactiva `immune` mientras está activa; God Mode conserva prioridad. No modifica la inmunidad de NPC.
+
 ### Rendimiento y visual
 - Anti-Lag.
 - Estabilizador FPS.
@@ -48,6 +51,7 @@ Este documento distingue las funciones realmente conectadas a la UI/consola de l
 .mapreveal
 .killprojs
 .clearprojectiles
+.toggle noiframes [on/off]
 ```
 
 También se pueden usar:
@@ -65,7 +69,7 @@ También se pueden usar:
 
 ## Pendiente de adaptación
 
-- Combat: Aimbot, No Combat IFrames.
+- Combat: Aimbot y opción No Combat IFrames para NPC (la variante local ya está adaptada).
 - LocalPlayer: Forced Equips, Mount Tweaks, Prevent Item Consumption, Prevent Server Modification, y revisar AntiDebuff/otros comportamientos.
 - Misc: Auto Fish, Auto Butcher, Butcher, Particle Annoy y variantes de eliminación/revelado.
 - Travel: Map TP, Mouse TP, Noclip, TP Bypass.
