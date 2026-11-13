@@ -12,6 +12,11 @@ internal static partial class HerosModPanel
     private static int extendedReachOriginalY;
     private const int ExtendedReachValue = 60;
 
+    // Limpieza automática de objetos tirados: solo en un jugador para no alterar servidores.
+    private static bool autoClearWorldItemsEnabled;
+    private static int autoClearWorldItemsTimer;
+    private const int AutoClearWorldItemsInterval = 600;
+
     // Protecciones locales reversibles: conserva los valores previos de cada personaje.
     private static Player noFallDamagePlayer;
     private static bool noFallDamageOriginal;
@@ -146,6 +151,60 @@ internal static partial class HerosModPanel
 
         infiniteMinionsPlayer = null;
         infiniteMinionsOriginalMax = 0;
+    }
+
+    private static int ClearWorldItemsLocal()
+    {
+        if (Main.dedServ || Main.gameMenu || Main.netMode != 0)
+            return 0;
+
+        int removed = 0;
+        for (int i = 0; i < Main.item.Length; i++)
+        {
+            Item item = Main.item[i];
+            if (item == null || !item.active)
+                continue;
+            item.active = false;
+            removed++;
+        }
+        return removed;
+    }
+
+    private static bool RevealLocalMap()
+    {
+        if (Main.dedServ || Main.gameMenu)
+            return false;
+
+        // Revela únicamente la iluminación del mapa que el cliente ya conoce;
+        // no solicita secciones ni envía paquetes al servidor.
+        for (int x = 0; x < Main.maxTilesX; x++)
+            for (int y = 0; y < Main.maxTilesY; y++)
+                Main.Map.UpdateLighting(x, y, byte.MaxValue);
+
+        Main.refreshMap = true;
+        return true;
+    }
+
+    private static void UpdateAdaptedUtilityFeatures()
+    {
+        if (!autoClearWorldItemsEnabled)
+        {
+            autoClearWorldItemsTimer = 0;
+            return;
+        }
+
+        if (Main.netMode != 0 || Main.gameMenu)
+        {
+            autoClearWorldItemsEnabled = false;
+            autoClearWorldItemsTimer = 0;
+            return;
+        }
+
+        if (++autoClearWorldItemsTimer >= AutoClearWorldItemsInterval)
+        {
+            autoClearWorldItemsTimer = 0;
+            ClearWorldItemsLocal();
+        }
     }
 
     // Acción manual: elimina únicamente proyectiles activos propiedad del jugador local.
