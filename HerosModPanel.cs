@@ -5383,7 +5383,7 @@ internal static partial class HerosModPanel
             case ".logall":
                 eventLogNPCEnabled = true;
                 eventLogPerformanceEnabled = true;
-                eventLogConnectionEnabled = true;
+
                 eventLogPlayersEnabled = true;
                 eventLogDeathsEnabled = true;
                 eventLogBossesEnabled = true;
