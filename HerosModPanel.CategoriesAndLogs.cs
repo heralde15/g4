@@ -142,6 +142,7 @@ internal static partial class HerosModPanel
                 ActionButton("Limpiar objetos (SP)", ".clearitems", 9);
                 ToggleButton("Auto limpiar objetos", "autoclearitems", autoClearWorldItemsEnabled, 10);
                 ToggleButton("Auto eliminar ganchos", "autokillhooks", autoKillHooksEnabled, 11);
+                ToggleButton("Auto Fish", "autofish", autoFishEnabled, 12);
                 break;
             case HeroCheatGroup.Rendimiento:
                 ToggleButton("Anti-Lag", "antilag", antiLagEnabled, 0);
