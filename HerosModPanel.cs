@@ -5342,7 +5342,7 @@ internal static partial class HerosModPanel
         {
             case ".cheats":
             case ".categorias":
-                commandConsoleOutput = "CATEGORÍAS HERO: .category jugador|movimiento|combate|visual|mundo|utilidades|rendimiento|todo. Abre HERO > Categorías para controles gráficos. Los toggles disponibles incluyen .god .fly .ghost .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems. Acciones: .heal .debuffclear .killprojs .clearitems .revealmap.";
+                commandConsoleOutput = "CATEGORÍAS HERO: .category jugador|movimiento|combate|visual|mundo|utilidades|rendimiento|todo. Abre HERO > Categorías para controles gráficos. Los toggles disponibles incluyen .god .fly .ghost .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems .autokillhooks. Acciones: .heal .debuffclear .killprojs .clearitems .revealmap.";
                 break;
             case ".category":
             case ".categoria":
@@ -5440,7 +5440,7 @@ internal static partial class HerosModPanel
                 break;
             case ".helpfeatures":
             case ".helpfunciones":
-                commandConsoleOutput = "TOGGLES: .toggle god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems [on/off]. Atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems [on/off] · acciones: .heal .debuffclear .killprojs .clearitems .revealmap · hooks: .autokillhooks [on/off] · HUD: .hud [on/off] .hudpos 0-5 .hudinfo <categoria> [on/off]. La limpieza de objetos es solo en un jugador.";
+                commandConsoleOutput = "TOGGLES: .toggle god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems [on/off]. Atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems .autokillhooks [on/off] · acciones: .heal .debuffclear .killprojs .clearitems .revealmap · hooks: .autokillhooks [on/off] · HUD: .hud [on/off] .hudpos 0-5 .hudinfo <categoria> [on/off]. La limpieza de objetos es solo en un jugador.";
                 break;
             case ".hudinfo":
                 {
