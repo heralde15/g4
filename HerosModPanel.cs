@@ -5631,6 +5631,8 @@ internal static partial class HerosModPanel
                             "reach" => extendedReachEnabled,
                             "autoclearitems" => autoClearWorldItemsEnabled,
                             "autokillhooks" => autoKillHooksEnabled,
+                            "noiframes" => noCombatIFramesEnabled,
+                            "forceequips" => forcedEquipsEnabled,
                             "nofall" => noFallDamageEnabled,
                             "noknockback" => noKnockbackEnabled,
                             "antidebuff" => antiDebuffEnabled,
