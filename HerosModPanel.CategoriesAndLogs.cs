@@ -83,6 +83,7 @@ internal static partial class HerosModPanel
                 ToggleButton("Vida / maná bloqueados", "lifelock", lifeLockEnabled, 5);
                 ToggleButton("Minions infinitos", "minions", infiniteMinionsEnabled, 6);
                 ToggleButton("Suerte aumentada", "luck", luckBoostEnabled, 7);
+                ToggleButton("Alcance extendido", "reach", extendedReachEnabled, 8);
                 break;
             case HeroCheatGroup.Movimiento:
                 ToggleButton("Vuelo libre", "fly", flyEnabled, 0);
