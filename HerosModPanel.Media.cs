@@ -75,7 +75,7 @@ internal static partial class HerosModPanel
             for (int i = 0; i < frameCount; i++)
             {
                 using var bitmap = new SKBitmap(outputInfo);
-                SKCodecOptions options = new SKCodecOptions(i, false);
+                SKCodecOptions options = new SKCodecOptions(i, -1);
 
                 // Si un fotograma depende de otro, Skia decodifica el fotograma
                 // requerido antes de componer el actual en el búfer de destino.
