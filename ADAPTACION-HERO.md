@@ -53,3 +53,11 @@ No se pudo ejecutar `dotnet build` con este paquete porque el ZIP recibido no in
 - Al apagar la función, ejecutar el apagado global o cambiar de personaje, HERO restaura el valor que tenía ese personaje.
 - La interfaz, `.toggle minions` y `.minions` ahora pasan por el mismo método para evitar estados divergentes.
 - Esta mejora evita que el límite quede permanentemente alterado después de desactivar la opción. El comportamiento en multijugador sigue sujeto a las validaciones del servidor.
+
+## Quinta pasada: toggles reversibles de protección local
+
+- Se mejoraron **Sin daño de caída** y **Sin retroceso** para conservar el valor previo de `Player.noFallDmg` y `Player.noKnockback`.
+- Al desactivar cada opción, HERO restaura el valor que tenía antes de activarla; también restaura el personaje anterior si cambia el jugador local.
+- La interfaz y el comando `.toggle` comparten los mismos métodos de activación, evitando que una ruta deje el flag modificado.
+- El apagado global de funciones también desactiva ambas opciones y ejecuta la restauración.
+- Son cambios locales de estado del personaje. El servidor puede seguir aplicando sus propias reglas y sincronización.
