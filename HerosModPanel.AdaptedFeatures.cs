@@ -17,6 +17,9 @@ internal static partial class HerosModPanel
     private static int autoClearWorldItemsTimer;
     private const int AutoClearWorldItemsInterval = 600;
 
+    // Retira ganchos de agarre propios cuando regresan junto al personaje.
+    private static bool autoKillHooksEnabled;
+
     // Protecciones locales reversibles: conserva los valores previos de cada personaje.
     private static Player noFallDamagePlayer;
     private static bool noFallDamageOriginal;
@@ -187,6 +190,20 @@ internal static partial class HerosModPanel
 
     private static void UpdateAdaptedUtilityFeatures()
     {
+        if (autoKillHooksEnabled && Main.LocalPlayer != null && Main.LocalPlayer.active)
+        {
+            Player player = Main.LocalPlayer;
+            for (int i = 0; i < Main.projectile.Length; i++)
+            {
+                Projectile hook = Main.projectile[i];
+                if (hook != null && hook.active && hook.owner == player.whoAmI
+                    && hook.type >= 0 && hook.type < Main.projHook.Length
+                    && Main.projHook[hook.type]
+                    && Microsoft.Xna.Framework.Vector2.Distance(player.Center, hook.Center) <= 32f)
+                    hook.Kill();
+            }
+        }
+
         if (!autoClearWorldItemsEnabled)
         {
             autoClearWorldItemsTimer = 0;
