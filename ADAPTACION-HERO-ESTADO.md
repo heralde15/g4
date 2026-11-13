@@ -79,6 +79,15 @@ También se pueden usar:
 - La consola conserva Ctrl derecho para abrir/cerrar y Enter o Alt derecho para ejecutar.
 - El historial es temporal: se reinicia al cerrar el juego; no altera archivos ni datos del mundo.
 
+### Personalización visual ampliada
+
+- La pestaña **Personalizar** conserva los siete temas de color y el contraste alto.
+- Permite cargar un fondo propio desde una ruta local del equipo.
+- Formatos admitidos: PNG, JPG y JPEG; límite de 20 MB y dimensiones máximas de 8192 × 8192.
+- Permite activar/desactivar el fondo, elegir opacidad del 25 %, 50 %, 75 % o 100 %, y quitar la imagen.
+- La ruta, el tema, el contraste y la opacidad se guardan en `HerosModPanel.settings`; el fondo se vuelve a cargar al iniciar una sesión si el archivo sigue disponible.
+- La imagen se dibuja detrás de la interfaz y se aplica una capa de contraste para mantener los textos legibles. La ruta debe ser accesible desde el mismo equipo donde se ejecuta el cliente.
+
 ## Restricciones
 
 - `.clearitems` y `.autoclearitems` solo funcionan en un jugador; no modifican drops de servidores.
