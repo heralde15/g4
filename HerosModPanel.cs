@@ -5253,17 +5253,20 @@ internal static partial class HerosModPanel
             uiBackgroundEnabled ? "Fondo: ACTIVADO" : "Fondo: desactivado", mouse,
             uiBackgroundEnabled ? UiAccent : UiTabColor))
         {
-            uiBackgroundEnabled = uiBackgroundTexture != null && !uiBackgroundEnabled;
+            bool hasPanelImage = uiBackgroundTexture != null || heroGifFrames.Count > 0 ||
+                !string.IsNullOrWhiteSpace(uiBackgroundImagePath);
+            uiBackgroundEnabled = hasPanelImage && !uiBackgroundEnabled;
             SetStatus(uiBackgroundEnabled ? "Fondo personalizado activado." : "Fondo personalizado desactivado.");
+            SaveSettingsIfChanged(true);
         }
         if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad + 163, y, 105, 25), "25%", mouse,
-            uiBackgroundOpacity == 25 ? UiAccent : UiTabColor)) uiBackgroundOpacity = 25;
+            uiBackgroundOpacity == 25 ? UiAccent : UiTabColor)) { uiBackgroundOpacity = 25; SaveSettingsIfChanged(true); }
         if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad + 274, y, 105, 25), "50%", mouse,
-            uiBackgroundOpacity == 50 ? UiAccent : UiTabColor)) uiBackgroundOpacity = 50;
+            uiBackgroundOpacity == 50 ? UiAccent : UiTabColor)) { uiBackgroundOpacity = 50; SaveSettingsIfChanged(true); }
         if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad + 385, y, 105, 25), "75%", mouse,
-            uiBackgroundOpacity == 75 ? UiAccent : UiTabColor)) uiBackgroundOpacity = 75;
+            uiBackgroundOpacity == 75 ? UiAccent : UiTabColor)) { uiBackgroundOpacity = 75; SaveSettingsIfChanged(true); }
         if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad + 496, y, 105, 25), "100%", mouse,
-            uiBackgroundOpacity == 100 ? UiAccent : UiTabColor)) uiBackgroundOpacity = 100;
+            uiBackgroundOpacity == 100 ? UiAccent : UiTabColor)) { uiBackgroundOpacity = 100; SaveSettingsIfChanged(true); }
         y += 30;
         string imageState = uiBackgroundTexture == null ? uiBackgroundNotice :
             "Imagen lista: " + Path.GetFileName(uiBackgroundImagePath) + " · opacidad " + uiBackgroundOpacity + "%";
@@ -5291,7 +5294,8 @@ internal static partial class HerosModPanel
             consoleBackgroundEnabled ? "Consola: ACTIVADA" : "Consola: desactivada", mouse,
             consoleBackgroundEnabled ? UiAccent : UiTabColor))
         {
-            consoleBackgroundEnabled = consoleBackgroundTexture != null && !consoleBackgroundEnabled;
+            bool hasConsoleImage = consoleBackgroundTexture != null || !string.IsNullOrWhiteSpace(consoleBackgroundImagePath);
+            consoleBackgroundEnabled = hasConsoleImage && !consoleBackgroundEnabled;
             SetStatus(consoleBackgroundEnabled ? "Fondo de consola activado." : "Fondo de consola desactivado.");
             SaveSettingsIfChanged(true);
         }
