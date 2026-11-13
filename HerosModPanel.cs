@@ -1056,7 +1056,7 @@ internal static partial class HerosModPanel
         sb.Draw(pixel, new Rectangle(panelRect.X, panelRect.Y, panelRect.Width, 2), UiAccent);
         sb.Draw(pixel, new Rectangle(panelRect.X, panelRect.Y + 2, panelRect.Width, panelRect.Height - 2), UiPanelColor);
         DrawCustomPanelBackground(sb, panelRect);
-        sb.Draw(pixel, titleRect, UiTitleColor);
+        sb.Draw(pixel, titleRect, uiBackgroundEnabled ? UiTitleColor * 0.88f : UiTitleColor);
         sb.Draw(pixel, new Rectangle(panelRect.X, panelRect.Y + 40, panelRect.Width, 1), UiAccent * 0.75f);
         // El botón ES/EN ocupa de panelRect.X + Pad a panelRect.X + Pad + 54; el título va a su derecha.
         Utils.DrawBorderString(sb, "HERO's Mod", new Vector2(panelRect.X + Pad + 66, panelRect.Y + 5), Color.White, 1.0f);
@@ -1137,7 +1137,7 @@ internal static partial class HerosModPanel
         // En pantallas muy bajas, reservar un área de contenido no negativa.
         contentY = Math.Min(contentY, panelRect.Bottom - 28);
         var contentRect = new Rectangle(panelRect.X + 5, contentY - 3, panelRect.Width - 10, Math.Max(1, panelRect.Bottom - contentY - 8));
-        sb.Draw(pixel, contentRect, new Color(13, 15, 24, 210));
+        sb.Draw(pixel, contentRect, new Color(13, 15, 24, uiBackgroundEnabled ? 155 : 210));
         sb.Draw(pixel, new Rectangle(contentRect.X, contentRect.Y, 2, contentRect.Height), UiAccent * 0.65f);
         // Red de seguridad: si una pestaña falla, el error se muestra en el panel y NO se propaga al
         // dibujado del juego (que dejaba sin cursor, HUD ni minimapa).
@@ -5085,7 +5085,15 @@ internal static partial class HerosModPanel
 
     private static void DrawCustomPanelBackground(SpriteBatch sb, Rectangle panel)
     {
-        if (!uiBackgroundEnabled || uiBackgroundTexture == null || uiBackgroundTexture.IsDisposed)
+        if (!uiBackgroundEnabled)
+            return;
+
+        // Recarga el fondo desde la ruta guardada al iniciar una sesión nueva.
+        if ((uiBackgroundTexture == null || uiBackgroundTexture.IsDisposed) &&
+            !string.IsNullOrWhiteSpace(uiBackgroundImagePath))
+            LoadCustomPanelBackground();
+
+        if (uiBackgroundTexture == null || uiBackgroundTexture.IsDisposed)
             return;
 
         try
