@@ -5350,7 +5350,7 @@ internal static partial class HerosModPanel
                 break;
             case ".help":
             case ".ayuda":
-                commandConsoleOutput = ".helpall = lista completa · .toggle <función> [on/off] · atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree [on/off] · .hudpos <posición> · .buff <ID> [segundos] · .log [on/off] · .logall · .logworld · .logcombat · .logsystem · .lognpc · .logperformance · .logitems · .logfile · .logstatus · .logclear · .help2";
+                commandConsoleOutput = ".helpall = lista completa · .toggle <función> [on/off] · atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems [on/off] · .hudpos <posición> · .buff <ID> [segundos] · .log [on/off] · .logall · .logworld · .logcombat · .logsystem · .lognpc · .logperformance · .logitems · .logfile · .logstatus · .logclear · .help2";
                 break;
             case ".log":
             case ".eventlog":
