@@ -12,6 +12,10 @@ internal static partial class HerosModPanel
     private static int extendedReachOriginalY;
     private const int ExtendedReachValue = 60;
 
+    // Conserva el límite de invocaciones del personaje para restaurarlo al apagar la función.
+    private static Player infiniteMinionsPlayer;
+    private static int infiniteMinionsOriginalMax;
+
     private static void ApplyExtendedReach()
     {
         Player local = Main.LocalPlayer;
@@ -45,6 +49,39 @@ internal static partial class HerosModPanel
         extendedReachPlayer = null;
         extendedReachOriginalX = 0;
         extendedReachOriginalY = 0;
+    }
+
+    private static void SetInfiniteMinions(bool enabled)
+    {
+        infiniteMinionsEnabled = enabled;
+        ApplyInfiniteMinions();
+    }
+
+    private static void ApplyInfiniteMinions()
+    {
+        Player local = Main.LocalPlayer;
+        if (infiniteMinionsPlayer != null && (!infiniteMinionsEnabled || !ReferenceEquals(infiniteMinionsPlayer, local)))
+            RestoreInfiniteMinions();
+
+        if (!infiniteMinionsEnabled || local == null || !local.active)
+            return;
+
+        if (!ReferenceEquals(infiniteMinionsPlayer, local))
+        {
+            infiniteMinionsPlayer = local;
+            infiniteMinionsOriginalMax = local.maxMinions;
+        }
+
+        local.maxMinions = 9999;
+    }
+
+    private static void RestoreInfiniteMinions()
+    {
+        if (infiniteMinionsPlayer != null)
+            infiniteMinionsPlayer.maxMinions = infiniteMinionsOriginalMax;
+
+        infiniteMinionsPlayer = null;
+        infiniteMinionsOriginalMax = 0;
     }
 
     // Acción manual: elimina únicamente proyectiles activos propiedad del jugador local.
