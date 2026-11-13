@@ -110,6 +110,7 @@ internal static partial class HerosModPanel
                 ToggleButton("Bloqueo de vida", "lifelock", lifeLockEnabled, 1);
                 ToggleButton("Limpiar efectos", "effects", antiEffectsEnabled, 2);
                 ToggleButton("Reducir proyectiles", "projectiles", antiLagProjectilesEnabled, 3);
+                ToggleButton("Sin i-frames (local)", "noiframes", noCombatIFramesEnabled, 4);
                 break;
             case HeroCheatGroup.Visual:
                 ToggleButton("Modo fantasma", "ghost", ghostModeEnabled, 0);
