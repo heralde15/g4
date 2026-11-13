@@ -519,6 +519,7 @@ internal static partial class HerosModPanel
         SetNoFallDamage(false);
         SetNoKnockback(false);
         forcedEquipsEnabled = false;
+        StopAutoFish();
         noCombatIFramesEnabled = false;
         lifeLockEnabled = false;
         defenseOverrideEnabled = false;
@@ -631,6 +632,7 @@ internal static partial class HerosModPanel
         // Función adaptada de HERO: amplía el alcance de colocación/minado solo para el jugador local.
         ApplyExtendedReach();
         UpdateAdaptedUtilityFeatures();
+        UpdateAutoFish();
 
         // Adaptaciones locales de cheats básicos de la referencia: solo afectan al personaje local.
         if (local != null && local.active && !local.dead)
@@ -5335,6 +5337,7 @@ internal static partial class HerosModPanel
             ".autoclearitems" => "autoclearitems",
             ".autokillhooks" => "autokillhooks",
             ".forceequips" => "forceequips",
+            ".autofish" => "autofish",
             _ => string.Empty
         };
         if (directFeature.Length > 0)
@@ -5357,7 +5360,7 @@ internal static partial class HerosModPanel
                 break;
             case ".help":
             case ".ayuda":
-                commandConsoleOutput = ".helpall = lista completa · .toggle <función> [on/off] · atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute  .shopfree .autoclearitems .autokillhooks [on/off] · .hudpos <posición> · .buff <ID> [segundos] · .log [on/off] · .logall · .logworld · .logcombat · .logsystem · .lognpc · .logperformance · .logitems · .logfile · .logstatus · .logclear · .help2";
+                commandConsoleOutput = ".helpall = lista completa · .toggle <función> [on/off] · atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute  .shopfree .autoclearitems .autokillhooks .autofish [on/off] · .hudpos <posición> · .buff <ID> [segundos] · .log [on/off] · .logall · .logworld · .logcombat · .logsystem · .lognpc · .logperformance · .logitems · .logfile · .logstatus · .logclear · .help2";
                 break;
             case ".log":
             case ".eventlog":
@@ -5539,7 +5542,7 @@ internal static partial class HerosModPanel
                 {
                     if (parts.Length < 2)
                     {
-                        commandConsoleOutput = "Uso: .toggle <god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems|autokillhooks|noiframes|forceequips> [on/off]";
+                        commandConsoleOutput = "Uso: .toggle <god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems|autokillhooks|noiframes|forceequips|autofish> [on/off]";
                         break;
                     }
                     string feature = argument;
@@ -5556,6 +5559,11 @@ internal static partial class HerosModPanel
                         case "reach": extendedReachEnabled = ToggleFeature(extendedReachEnabled); ApplyExtendedReach(); break;
                         case "noiframes": noCombatIFramesEnabled = ToggleFeature(noCombatIFramesEnabled); break;
                         case "forceequips": forcedEquipsEnabled = ToggleFeature(forcedEquipsEnabled); break;
+                        case "autofish":
+                            autoFishEnabled = ToggleFeature(autoFishEnabled);
+                            if (autoFishEnabled) autoFishRodSlot = -1;
+                            else StopAutoFish();
+                            break;
                         case "autokillhooks":
                             autoKillHooksEnabled = ToggleFeature(autoKillHooksEnabled);
                             break;
