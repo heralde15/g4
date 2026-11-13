@@ -621,6 +621,9 @@ internal static partial class HerosModPanel
 
         var local = Main.LocalPlayer;
 
+        // Función adaptada de HERO: amplía el alcance de colocación/minado solo para el jugador local.
+        ApplyExtendedReach();
+
         // Adaptaciones locales de cheats básicos de la referencia: solo afectan al personaje local.
         if (local != null && local.active && !local.dead)
         {
@@ -5499,7 +5502,7 @@ internal static partial class HerosModPanel
                 {
                     if (parts.Length < 2)
                     {
-                        commandConsoleOutput = "Uso: .toggle <god|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree> [on/off]";
+                        commandConsoleOutput = "Uso: .toggle <god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree> [on/off]";
                         break;
                     }
                     string feature = argument;
@@ -5513,6 +5516,7 @@ internal static partial class HerosModPanel
                     bool blocked = false;
                     switch (feature)
                     {
+                        case "reach": extendedReachEnabled = ToggleFeature(extendedReachEnabled); ApplyExtendedReach(); break;
                         case "nofall": noFallDamageEnabled = ToggleFeature(noFallDamageEnabled); break;
                         case "noknockback": noKnockbackEnabled = ToggleFeature(noKnockbackEnabled); break;
                         case "antidebuff": antiDebuffEnabled = ToggleFeature(antiDebuffEnabled); break;
@@ -5575,6 +5579,7 @@ internal static partial class HerosModPanel
                         bool enabled = feature switch
                         {
                             "god" => godmodeEnabled,
+                            "reach" => extendedReachEnabled,
                             "nofall" => noFallDamageEnabled,
                             "noknockback" => noKnockbackEnabled,
                             "antidebuff" => antiDebuffEnabled,
