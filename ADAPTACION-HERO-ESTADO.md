@@ -87,3 +87,14 @@ No copiar clases del cliente descompilado literalmente: varias dependen de `Terr
 ## Validación
 
 Los cambios están guardados en esta rama, pero aún requieren compilación local y pruebas dentro del juego. No se declara una build correcta hasta recibir y revisar el resultado de `dotnet build`.
+
+
+## Adaptaciones solicitadas: Travel y Auto Butcher
+
+- **Noclip**: activa colisión deshabilitada mediante detección por reflexión del miembro `noTileCollide`; movimiento con WASD/flechas, Espacio y Shift. Conserva y restaura el valor de colisión anterior al desactivar.
+- **Mouse TP**: `.mousetp` teletransporta al jugador local a `Main.MouseWorld`.
+- **Map TP**: `.maptp <tileX> <tileY>` teletransporta a coordenadas del mapa expresadas en tiles. Se valida el límite del mundo.
+- **Auto Butcher**: `.toggle autobutcher on/off` revisa NPC hostiles periódicamente; `.butcher` ejecuta una pasada manual. Está limitado a un jugador y excluye NPC amistosos, town NPC, invencibles, protegidos y segmentos de NPC multipartes.
+- UI: Noclip y Mouse TP en Movimiento; Auto Butcher y Butcher manual en Mundo.
+
+Estas funciones todavía requieren build y pruebas en el juego. Auto Butcher no se ejecuta en multijugador para evitar enviar daño local falso al servidor. Map TP usa coordenadas de tiles introducidas en consola; no simula el clic de selección del mapa fullscreen.
