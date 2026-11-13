@@ -5451,7 +5451,7 @@ internal static partial class HerosModPanel
                 break;
             case ".helpinfo":
             case ".helpdatos":
-                commandConsoleOutput = "DATOS: .report = informe combinado del mundo/personaje · .diagnostics = rendimiento y entidades · .server = conexión y personaje · .ping = latencia disponible · .world = dificultad/progreso · .biome = biomas · .clock = hora/clima · .inventory = espacios/objeto equipado · .buffs = buffs activos · .counts = FPS y entidades · .players = jugadores visibles · .equipment = armadura/equipo · .status = estado de toggles.";
+                commandConsoleOutput = "DATOS: .report = informe combinado del mundo/personaje · .diagnostics = rendimiento y entidades · .server = conexión y personaje · .ping = latencia disponible · .world = dificultad/progreso · .biome = biomas · .clock = hora/clima · .inventory = espacios/objeto equipado · .buffs = buffs activos · .counts = FPS y entidades · .players = jugadores visibles · .equipment = armadura/equipo · .bosses = jefes activos · .hostiles [tiles] = enemigos cercanos · .worldscan = resumen del mundo · .status = estado de toggles.";
                 break;
             case ".helpfeatures":
             case ".helpfunciones":
