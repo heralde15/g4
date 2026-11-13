@@ -518,6 +518,7 @@ internal static partial class HerosModPanel
         SetInfiniteMinions(false);
         SetNoFallDamage(false);
         SetNoKnockback(false);
+        noCombatIFramesEnabled = false;
         lifeLockEnabled = false;
         defenseOverrideEnabled = false;
         antiLagEnabled = false;
@@ -635,6 +636,7 @@ internal static partial class HerosModPanel
         {
             ApplyNoFallDamage();
             ApplyNoKnockback();
+            ApplyNoCombatIFrames();
             if (infiniteBreathEnabled) local.breath = local.breathMax;
             if (antiDebuffEnabled)
             {
@@ -5342,7 +5344,7 @@ internal static partial class HerosModPanel
         {
             case ".cheats":
             case ".categorias":
-                commandConsoleOutput = "CATEGORÍAS HERO: .category jugador|movimiento|combate|visual|mundo|utilidades|rendimiento|todo. Abre HERO > Categorías para controles gráficos. Los toggles disponibles incluyen .god .fly .ghost .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems .autokillhooks. Acciones: .heal .debuffclear .killprojs .clearitems .revealmap.";
+                commandConsoleOutput = "CATEGORÍAS HERO: .category jugador|movimiento|combate|visual|mundo|utilidades|rendimiento|todo. Abre HERO > Categorías para controles gráficos. Los toggles disponibles incluyen .god .fly .ghost .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems .autokillhooks .noiframes. Acciones: .heal .debuffclear .killprojs .clearitems .revealmap.";
                 break;
             case ".category":
             case ".categoria":
@@ -5534,7 +5536,7 @@ internal static partial class HerosModPanel
                 {
                     if (parts.Length < 2)
                     {
-                        commandConsoleOutput = "Uso: .toggle <god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems|autokillhooks> [on/off]";
+                        commandConsoleOutput = "Uso: .toggle <god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems|autokillhooks|noiframes> [on/off]";
                         break;
                     }
                     string feature = argument;
@@ -5549,6 +5551,7 @@ internal static partial class HerosModPanel
                     switch (feature)
                     {
                         case "reach": extendedReachEnabled = ToggleFeature(extendedReachEnabled); ApplyExtendedReach(); break;
+                        case "noiframes": noCombatIFramesEnabled = ToggleFeature(noCombatIFramesEnabled); break;
                         case "autokillhooks":
                             autoKillHooksEnabled = ToggleFeature(autoKillHooksEnabled);
                             break;
