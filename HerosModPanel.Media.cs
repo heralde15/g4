@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Xna.Framework;
+using XnaColor = Microsoft.Xna.Framework.Color;
 using Microsoft.Xna.Framework.Graphics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Gif;
@@ -65,11 +65,11 @@ internal static partial class HerosModPanel
                     Rgba32[] sourcePixels = new Rgba32[width * height];
                     sourceFrame.CopyPixelDataTo(sourcePixels);
 
-                    Color[] texturePixels = new Color[sourcePixels.Length];
+                    XnaColor[] texturePixels = new XnaColor[sourcePixels.Length];
                     for (int pixelIndex = 0; pixelIndex < sourcePixels.Length; pixelIndex++)
                     {
                         Rgba32 color = sourcePixels[pixelIndex];
-                        texturePixels[pixelIndex] = new Color(color.R, color.G, color.B, color.A);
+                        texturePixels[pixelIndex] = new XnaColor(color.R, color.G, color.B, color.A);
                     }
 
                     var texture = new Texture2D(Main.graphics.GraphicsDevice, width, height);
@@ -81,6 +81,13 @@ internal static partial class HerosModPanel
                 }
             }
 
+            try
+            {
+                if (uiBackgroundTexture != null && !uiBackgroundTexture.IsDisposed)
+                    uiBackgroundTexture.Dispose();
+            }
+            catch { }
+            uiBackgroundTexture = null;
             UnloadAnimatedPanelBackground();
             heroGifFrames.AddRange(decodedFrames);
             decodedFrames.Clear();
@@ -127,7 +134,7 @@ internal static partial class HerosModPanel
 
         Texture2D texture = heroGifFrames[heroGifFrameIndex].Texture;
         if (texture != null && !texture.IsDisposed)
-            sb.Draw(texture, panel, Color.White * (Math.Clamp(uiBackgroundOpacity, 10, 100) / 100f));
+            sb.Draw(texture, panel, XnaColor.White * (Math.Clamp(uiBackgroundOpacity, 10, 100) / 100f));
     }
 
     private static void UnloadAnimatedPanelBackground()
