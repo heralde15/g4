@@ -1,4 +1,4 @@
- <Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<Import Project="../Configuration.targets" />
 	<Import Project="../../WorkspaceInfo.targets" />
@@ -45,10 +45,9 @@
 		<Reference Include="SteelSeriesEngineWrapper" />
 
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
-		<!-- SkiaSharp sustituye ImageSharp para decodificar GIF animados sin exigir licencia comercial. -->
-		<PackageReference Include="SkiaSharp" Version="4.156.0" />
-		<!-- Bibliotecas nativas necesarias para ejecutar SkiaSharp en Windows. -->
-		<PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="4.156.0" />
+		<PackageReference Include="SkiaSharp" Version="4.155.0" />
+		<PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="4.155.0" />
+		<PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.155.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.2" />
 		<PackageReference Include="Steamworks.NET.AnyCPU" Version="2025.162.4" />
 
