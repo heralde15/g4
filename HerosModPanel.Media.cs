@@ -4,9 +4,7 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using XnaColor = Microsoft.Xna.Framework.Color;
 using Microsoft.Xna.Framework.Graphics;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Gif;
-using SixLabors.ImageSharp.PixelFormats;
+using SkiaSharp;
 
 namespace Terraria.Unified.Features;
 
@@ -47,56 +45,74 @@ internal static partial class HerosModPanel
             if (!info.Exists || info.Length <= 0 || info.Length > 20 * 1024 * 1024)
                 throw new InvalidDataException("El GIF debe pesar entre 1 byte y 20 MB.");
 
-            // Identifica dimensiones y fotogramas antes de decodificar para rechazar GIF enormes.
-            ImageInfo imageInfo = SixLabors.ImageSharp.Image.Identify(path);
-            if (imageInfo == null)
+            // SkiaSharp identifica el GIF y permite consultar los fotogramas antes
+            // de decodificarlos, evitando reservar memoria para animaciones enormes.
+            using SKCodec codec = SKCodec.Create(path);
+            if (codec == null)
                 throw new InvalidDataException("No se pudo identificar el GIF.");
 
-            int identifiedFrames = imageInfo.FrameMetadataCollection.Count;
-            if (imageInfo.Width < 1 || imageInfo.Height < 1 || imageInfo.Width > 2048 || imageInfo.Height > 2048)
+            int width = codec.Info.Width;
+            int height = codec.Info.Height;
+            int frameCount = codec.FrameCount;
+
+            if (width < 1 || height < 1 || width > 2048 || height > 2048)
                 throw new InvalidDataException("El GIF no puede superar 2048 × 2048.");
-            if (identifiedFrames < 2)
+            if (frameCount < 2)
                 throw new InvalidDataException("El archivo GIF no contiene animación.");
-            if (identifiedFrames > 50 || (long)imageInfo.Width * imageInfo.Height * identifiedFrames > 24000000L)
+            if (frameCount > 50 || (long)width * height * frameCount > 24000000L)
                 throw new InvalidDataException("El GIF tiene demasiados fotogramas o consume demasiada memoria (máximo 50 fotogramas y 24 MP acumulados).");
 
-            using (Image<Rgba32> image = SixLabors.ImageSharp.Image.Load<Rgba32>(path))
+            SKImageInfo outputInfo = new SKImageInfo(
+                width,
+                height,
+                SKColorType.Rgba8888,
+                SKAlphaType.Unpremul);
+
+            SKCodecFrameInfo[] frameInfos = codec.FrameInfo;
+            if (frameInfos == null || frameInfos.Length != frameCount)
+                throw new InvalidDataException("No se pudo leer la información de los fotogramas GIF.");
+
+            for (int i = 0; i < frameCount; i++)
             {
-                int width = image.Width;
-                int height = image.Height;
-                int frameCount = image.Frames.Count;
+                using var bitmap = new SKBitmap(outputInfo);
+                SKCodecOptions options = new SKCodecOptions(i, false);
 
-                if (width < 1 || height < 1 || width > 2048 || height > 2048 ||
-                    frameCount < 2 || frameCount > 50 ||
-                    (long)width * height * frameCount > 24000000L)
-                    throw new InvalidDataException("El GIF cambió durante la lectura o supera los límites de memoria.");
+                // Si un fotograma depende de otro, Skia decodifica el fotograma
+                // requerido antes de componer el actual en el búfer de destino.
+                SKCodecResult decodeResult = codec.GetPixels(
+                    outputInfo,
+                    bitmap.GetPixels(),
+                    bitmap.RowBytes,
+                    options);
 
-                for (int i = 0; i < frameCount; i++)
+                if (decodeResult != SKCodecResult.Success)
+                    throw new InvalidDataException("No se pudo decodificar el fotograma " + (i + 1) + " del GIF: " + decodeResult + ".");
+
+                XnaColor[] texturePixels = new XnaColor[width * height];
+                for (int row = 0; row < height; row++)
                 {
-                    ImageFrame<Rgba32> sourceFrame = image.Frames[i];
-                    int sourceStride = sourceFrame.PixelBuffer.RowStride;
-                    Rgba32[] sourcePixels = new Rgba32[sourceStride * height];
-                    sourceFrame.CopyPixelDataTo(sourcePixels);
-
-                    XnaColor[] texturePixels = new XnaColor[width * height];
-                    for (int row = 0; row < height; row++)
+                    int destinationRow = row * width;
+                    for (int column = 0; column < width; column++)
                     {
-                        int sourceRow = row * sourceStride;
-                        int destinationRow = row * width;
-                        for (int column = 0; column < width; column++)
-                        {
-                            Rgba32 color = sourcePixels[sourceRow + column];
-                            texturePixels[destinationRow + column] = new XnaColor(color.R, color.G, color.B, color.A);
-                        }
+                        SKColor color = bitmap.GetPixel(column, row);
+                        texturePixels[destinationRow + column] =
+                            new XnaColor(color.Red, color.Green, color.Blue, color.Alpha);
                     }
-
-                    var texture = new Texture2D(Main.graphics.GraphicsDevice, width, height);
-                    texture.SetData(texturePixels);
-
-                    int delay = sourceFrame.Metadata.GetGifMetadata().FrameDelay;
-                    int durationMs = Math.Clamp(delay <= 0 ? 100 : delay * 10, 20, 10000);
-                    decodedFrames.Add(new HeroGifFrame { Texture = texture, DurationMs = durationMs });
                 }
+
+                var texture = new Texture2D(Main.graphics.GraphicsDevice, width, height);
+                try
+                {
+                    texture.SetData(texturePixels);
+                }
+                catch
+                {
+                    texture.Dispose();
+                    throw;
+                }
+
+                int durationMs = Math.Clamp(frameInfos[i].Duration <= 0 ? 100 : frameInfos[i].Duration, 20, 10000);
+                decodedFrames.Add(new HeroGifFrame { Texture = texture, DurationMs = durationMs });
             }
 
             try
