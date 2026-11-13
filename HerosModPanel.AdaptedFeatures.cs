@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
 
@@ -173,10 +174,10 @@ internal static partial class HerosModPanel
         int removed = 0;
         for (int i = 0; i < Main.item.Length; i++)
         {
-            Item item = Main.item[i];
-            if (item == null || !item.active)
+            WorldItem worldItem = Main.item[i];
+            if (worldItem == null || !worldItem.active)
                 continue;
-            item.active = false;
+            worldItem.active = false;
             removed++;
         }
         return removed;
@@ -205,20 +206,54 @@ internal static partial class HerosModPanel
         Player player = Main.LocalPlayer;
         foreach (KeyValuePair<int, int> entry in forcedEquipItems)
         {
-            if (!ContentSamples.ItemsByType.TryGetValue(entry.Key, out Item item) || item == null || item.IsAir || !item.accessory)
+            Item item = new Item();
+            item.SetDefaults(entry.Key);
+            if (item.IsAir || !item.accessory)
                 continue;
 
             int amount = Math.Clamp(entry.Value, 1, 10);
             for (int i = 0; i < amount; i++)
             {
-                player.GrantArmorBenefits(item, force: true);
-                player.ApplyEquipFunctional(0, item, force: true);
+                // Estos métodos son internos/privados en esta variante del motor.
+                // Se invocan por reflexión para mantener compatibilidad sin romper la compilación.
+                InvokePlayerEquipMethod(player, "GrantArmorBenefits", item, true);
+                InvokePlayerEquipMethod(player, "ApplyEquipFunctional", 0, item, true);
             }
 
             if (entry.Key == 4743)
                 player.hasFootball = true;
             if (entry.Key == 4760)
                 player.hasRaisableShield = true;
+        }
+    }
+
+    private static void InvokePlayerEquipMethod(Player player, string methodName, params object[] arguments)
+    {
+        MethodInfo[] methods = typeof(Player).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        foreach (MethodInfo method in methods)
+        {
+            if (method.Name != methodName)
+                continue;
+
+            ParameterInfo[] parameters = method.GetParameters();
+            if (parameters.Length != arguments.Length)
+                continue;
+
+            bool matches = true;
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (arguments[i] == null || !parameters[i].ParameterType.IsInstanceOfType(arguments[i]))
+                {
+                    matches = false;
+                    break;
+                }
+            }
+
+            if (!matches)
+                continue;
+
+            method.Invoke(player, arguments);
+            return;
         }
     }
 
@@ -244,7 +279,8 @@ internal static partial class HerosModPanel
                 if (hook != null && hook.active && hook.owner == player.whoAmI
                     && hook.type >= 0 && hook.type < Main.projHook.Length
                     && Main.projHook[hook.type]
-                    && Microsoft.Xna.Framework.Vector2.Distance(player.Center, hook.Center) <= 32f)
+                    && Math.Abs(player.Center.X - hook.Center.X) <= 32f
+                    && Math.Abs(player.Center.Y - hook.Center.Y) <= 32f)
                     hook.Kill();
             }
         }
