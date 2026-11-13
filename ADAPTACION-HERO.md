@@ -30,8 +30,8 @@ No se pudo ejecutar `dotnet build` con este paquete porque el ZIP recibido no in
 ## Segunda pasada: alcance extendido local
 
 - Se añadió el toggle `reach` a la categoría Jugador y al comando `.toggle reach [on/off]`.
-- La función aumenta `tileRangeX` y `tileRangeY` del personaje local a 60 mientras está activa.
-- Los valores originales se guardan y se restauran al desactivar la función o cambiar de personaje; no modifica otros jugadores ni envía paquetes al servidor.
+- La función aumenta `Player.tileRangeX` y `Player.tileRangeY` a 60 mientras está activa. En esta versión de Terraria estos miembros son estáticos, por lo que se accede a ellos mediante el tipo `Player`.
+- Los valores originales se guardan y se restauran al desactivar la función. El alcance es una configuración estática del cliente, no un campo independiente de cada instancia de jugador.
 - La adaptación se implementa en `HerosModPanel.AdaptedFeatures.cs` y se conecta al ciclo `UpdateLogic()` existente.
 
 
@@ -53,6 +53,12 @@ No se pudo ejecutar `dotnet build` con este paquete porque el ZIP recibido no in
 - Al apagar la función, ejecutar el apagado global o cambiar de personaje, HERO restaura el valor que tenía ese personaje.
 - La interfaz, `.toggle minions` y `.minions` ahora pasan por el mismo método para evitar estados divergentes.
 - Esta mejora evita que el límite quede permanentemente alterado después de desactivar la opción. El comportamiento en multijugador sigue sujeto a las validaciones del servidor.
+
+## Corrección de compilación: alcance estático y métodos de protección
+
+- Se corrigió el acceso a `Player.tileRangeX` y `Player.tileRangeY`: se leen, modifican y restauran mediante `Player`, no desde `Main.LocalPlayer`.
+- Se incorporaron realmente a `HerosModPanel.AdaptedFeatures.cs` los métodos `SetNoFallDamage`, `ApplyNoFallDamage`, `SetNoKnockback` y `ApplyNoKnockback`, que faltaban en el archivo publicado aunque el panel ya los invocaba.
+- Se verificó en el contenido de la rama que los métodos existen y que no quedan accesos de instancia a `tileRangeX`/`tileRangeY`. Esta comprobación no sustituye una compilación real.
 
 ## Quinta pasada: toggles reversibles de protección local
 
