@@ -46,3 +46,25 @@ internal static partial class HerosModPanel
         extendedReachOriginalY = 0;
     }
 }
+
+    // Acción manual: elimina únicamente proyectiles activos propiedad del jugador local.
+    // No envía paquetes ni modifica proyectiles de otros jugadores.
+    private static int KillOwnedProjectilesLocal()
+    {
+        if (Main.dedServ || Main.gameMenu || Main.LocalPlayer == null || !Main.LocalPlayer.active)
+            return 0;
+
+        int removed = 0;
+        int owner = Main.myPlayer;
+        for (int i = 0; i < Main.projectile.Length; i++)
+        {
+            Projectile projectile = Main.projectile[i];
+            if (projectile == null || !projectile.active || projectile.owner != owner)
+                continue;
+
+            projectile.Kill();
+            removed++;
+        }
+
+        return removed;
+    }
