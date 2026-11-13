@@ -17,6 +17,9 @@ internal static partial class HerosModPanel
     private static int autoClearWorldItemsTimer;
     private const int AutoClearWorldItemsInterval = 600;
 
+    // Desactiva los frames de invulnerabilidad del jugador local (no afecta NPCs).
+    private static bool noCombatIFramesEnabled;
+
     // Retira ganchos de agarre propios cuando regresan junto al personaje.
     private static bool autoKillHooksEnabled;
 
@@ -186,6 +189,17 @@ internal static partial class HerosModPanel
 
         Main.refreshMap = true;
         return true;
+    }
+
+    private static void ApplyNoCombatIFrames()
+    {
+        if (!noCombatIFramesEnabled || Main.LocalPlayer == null || !Main.LocalPlayer.active)
+            return;
+
+        // Mantiene la opción estrictamente local. God Mode conserva prioridad si está activo.
+        Main.LocalPlayer.immuneTime = 0;
+        if (!godmodeEnabled)
+            Main.LocalPlayer.immune = false;
     }
 
     private static void UpdateAdaptedUtilityFeatures()
