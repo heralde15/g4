@@ -968,8 +968,22 @@ internal static partial class HerosModPanel
 
     public static void Draw(SpriteBatch sb)
     {
-        if (Main.dedServ || Main.gameMenu)
+        if (Main.dedServ)
             return;
+
+        // La consola también está disponible en el menú principal.
+        // En el menú no se actualiza lógica de jugador ni funciones del mundo.
+        if (Main.gameMenu)
+        {
+            HandleMenuConsoleToggleKey();
+            if (commandConsoleVisible)
+            {
+                var menuPixel = TextureAssets.MagicPixel.Value;
+                DrawCommandConsole(sb, menuPixel);
+                HandleCommandConsoleTyping();
+            }
+            return;
+        }
 
         UpdateEventChatLog();
         UpdateLogic();
@@ -5192,6 +5206,28 @@ internal static partial class HerosModPanel
         }
     }
 
+    private static void HandleMenuConsoleToggleKey()
+    {
+        if (!Main.drawingPlayerChat &&
+            Main.keyState.IsKeyDown(Keys.RightControl) &&
+            Main.oldKeyState.IsKeyUp(Keys.RightControl))
+        {
+            commandConsoleVisible = !commandConsoleVisible;
+            if (commandConsoleVisible)
+            {
+                commandConsolePreviousPanelVisible = false;
+                commandConsoleInput = string.Empty;
+                activeField = 0;
+                Main.clrInput();
+            }
+            else
+            {
+                commandConsoleInput = string.Empty;
+                Main.clrInput();
+            }
+        }
+    }
+
     private static void HandleToggleKey()
     {
         if (!Main.drawingPlayerChat && Main.keyState.IsKeyDown(Keys.RightControl) && Main.oldKeyState.IsKeyUp(Keys.RightControl))
@@ -5288,6 +5324,13 @@ internal static partial class HerosModPanel
         Main.clrInput();
         if (command.Length == 0)
             return;
+
+        // En el menú principal solo se muestra la consola; las acciones requieren un mundo cargado.
+        if (Main.gameMenu)
+        {
+            commandConsoleOutput = "Estás en el menú. Entra a un mundo para ejecutar comandos.";
+            return;
+        }
 
         // Los comandos con punto son funciones locales de HERO; no se envían al servidor.
         if (command.StartsWith(".", StringComparison.Ordinal))
