@@ -505,6 +505,8 @@ internal static partial class HerosModPanel
     {
         // Apaga funciones activas sin borrar datos, selecciones, clips ni ajustes guardados.
         godmodeEnabled = false;
+        autoClearWorldItemsEnabled = false;
+        autoClearWorldItemsTimer = 0;
         npcShopFreeEnabled = false;
         luckBoostEnabled = false;
         ghostModeEnabled = false;
@@ -625,6 +627,7 @@ internal static partial class HerosModPanel
 
         // Función adaptada de HERO: amplía el alcance de colocación/minado solo para el jugador local.
         ApplyExtendedReach();
+        UpdateAdaptedUtilityFeatures();
 
         // Adaptaciones locales de cheats básicos de la referencia: solo afectan al personaje local.
         if (local != null && local.active && !local.dead)
@@ -5434,7 +5437,7 @@ internal static partial class HerosModPanel
                 break;
             case ".helpfeatures":
             case ".helpfunciones":
-                commandConsoleOutput = "TOGGLES: .toggle god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree [on/off]. Atajos directos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree [on/off] · acciones: .heal .debuffclear .killprojs · HUD: .hud [on/off] .hudpos 0-5 .hudinfo <categoria> [on/off]. En multijugador el servidor puede revertir cambios locales.";
+                commandConsoleOutput = "TOGGLES: .toggle god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems [on/off]. Atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems [on/off] · acciones: .heal .debuffclear .killprojs .clearitems .revealmap · HUD: .hud [on/off] .hudpos 0-5 .hudinfo <categoria> [on/off]. La limpieza de objetos es solo en un jugador.";
                 break;
             case ".hudinfo":
                 {
@@ -5528,7 +5531,7 @@ internal static partial class HerosModPanel
                 {
                     if (parts.Length < 2)
                     {
-                        commandConsoleOutput = "Uso: .toggle <god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree> [on/off]";
+                        commandConsoleOutput = "Uso: .toggle <god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems> [on/off]";
                         break;
                     }
                     string feature = argument;
@@ -5543,6 +5546,16 @@ internal static partial class HerosModPanel
                     switch (feature)
                     {
                         case "reach": extendedReachEnabled = ToggleFeature(extendedReachEnabled); ApplyExtendedReach(); break;
+                        case "autoclearitems":
+                            if (Main.netMode != 0 && toggleRequestedState != false)
+                            {
+                                commandConsoleOutput = "Limpieza automática bloqueada: solo funciona en un jugador.";
+                                blocked = true;
+                                break;
+                            }
+                            autoClearWorldItemsEnabled = ToggleFeature(autoClearWorldItemsEnabled);
+                            autoClearWorldItemsTimer = 0;
+                            break;
                         case "nofall": SetNoFallDamage(ToggleFeature(noFallDamageEnabled)); break;
                         case "noknockback": SetNoKnockback(ToggleFeature(noKnockbackEnabled)); break;
                         case "antidebuff": antiDebuffEnabled = ToggleFeature(antiDebuffEnabled); break;
@@ -5603,6 +5616,7 @@ internal static partial class HerosModPanel
                         {
                             "god" => godmodeEnabled,
                             "reach" => extendedReachEnabled,
+                            "autoclearitems" => autoClearWorldItemsEnabled,
                             "nofall" => noFallDamageEnabled,
                             "noknockback" => noKnockbackEnabled,
                             "antidebuff" => antiDebuffEnabled,
@@ -5624,6 +5638,21 @@ internal static partial class HerosModPanel
                     }
                     break;
                 }
+            case ".clearitems":
+            case ".deleteitems":
+                {
+                    int removed = ClearWorldItemsLocal();
+                    commandConsoleOutput = Main.netMode == 0
+                        ? "Objetos del suelo eliminados localmente: " + removed + "."
+                        : "No se borran objetos en multijugador: el servidor controla los drops.";
+                    break;
+                }
+            case ".revealmap":
+            case ".mapreveal":
+                commandConsoleOutput = RevealLocalMap()
+                    ? "Mapa local actualizado. Solo se reveló la iluminación ya conocida por el cliente."
+                    : "No se puede revelar el mapa desde el menú.";
+                break;
             case ".killprojs":
             case ".clearprojectiles":
                 {
