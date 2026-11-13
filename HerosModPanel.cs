@@ -5440,7 +5440,7 @@ internal static partial class HerosModPanel
                 break;
             case ".helpfeatures":
             case ".helpfunciones":
-                commandConsoleOutput = "TOGGLES: .toggle god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems [on/off]. Atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems .autokillhooks [on/off] · acciones: .heal .debuffclear .killprojs .clearitems .revealmap · hooks: .autokillhooks [on/off] · HUD: .hud [on/off] .hudpos 0-5 .hudinfo <categoria> [on/off]. La limpieza de objetos es solo en un jugador.";
+                commandConsoleOutput = "TOGGLES: .toggle god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems|autokillhooks [on/off]. Atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems .autokillhooks [on/off] · acciones: .heal .debuffclear .killprojs .clearitems .revealmap · hooks: .autokillhooks [on/off] · HUD: .hud [on/off] .hudpos 0-5 .hudinfo <categoria> [on/off]. La limpieza de objetos es solo en un jugador.";
                 break;
             case ".hudinfo":
                 {
@@ -5534,7 +5534,7 @@ internal static partial class HerosModPanel
                 {
                     if (parts.Length < 2)
                     {
-                        commandConsoleOutput = "Uso: .toggle <god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems> [on/off]";
+                        commandConsoleOutput = "Uso: .toggle <god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems|autokillhooks> [on/off]";
                         break;
                     }
                     string feature = argument;
