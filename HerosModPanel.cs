@@ -127,6 +127,12 @@ internal static partial class HerosModPanel
     // Apariencia del panel; solo cambia el dibujo, no altera las funciones del mod.
     private static int uiTheme = 6;
     private static bool uiHighContrast;
+    // Fondo personalizado opcional para el panel HERO. La ruta se guarda en los ajustes locales.
+    private static string uiBackgroundImagePath = string.Empty;
+    private static Texture2D uiBackgroundTexture;
+    private static bool uiBackgroundEnabled;
+    private static int uiBackgroundOpacity = 48;
+    private static string uiBackgroundNotice = "Sin imagen personalizada cargada.";
     private static readonly Color[] UiAccents =
     {
         new Color(70, 130, 180), // Azul
@@ -1049,6 +1055,7 @@ internal static partial class HerosModPanel
         sb.Draw(pixel, panelRect, new Color(8, 10, 18, 245));
         sb.Draw(pixel, new Rectangle(panelRect.X, panelRect.Y, panelRect.Width, 2), UiAccent);
         sb.Draw(pixel, new Rectangle(panelRect.X, panelRect.Y + 2, panelRect.Width, panelRect.Height - 2), UiPanelColor);
+        DrawCustomPanelBackground(sb, panelRect);
         sb.Draw(pixel, titleRect, UiTitleColor);
         sb.Draw(pixel, new Rectangle(panelRect.X, panelRect.Y + 40, panelRect.Width, 1), UiAccent * 0.75f);
         // El botón ES/EN ocupa de panelRect.X + Pad a panelRect.X + Pad + 54; el título va a su derecha.
@@ -4880,7 +4887,7 @@ internal static partial class HerosModPanel
     // no en el mundo/servidor. Se persisten solo opciones explícitas, nunca estados temporales de UI.
     private static readonly string[] PersistentBooleanSettings =
     {
-        nameof(uiHighContrast), nameof(godmodeEnabled), nameof(adventureUnrestrictedEnabled), nameof(noSpawnsEnabled),
+        nameof(uiHighContrast), nameof(uiBackgroundEnabled), nameof(godmodeEnabled), nameof(adventureUnrestrictedEnabled), nameof(noSpawnsEnabled),
         nameof(flyEnabled), nameof(infiniteMinionsEnabled), nameof(lifeLockEnabled),
         nameof(defenseOverrideEnabled), nameof(antiLagEnabled), nameof(antiLagProjectilesEnabled),
         nameof(fpsStabilizerEnabled), nameof(muteGameSoundsEnabled),
@@ -4915,6 +4922,10 @@ internal static partial class HerosModPanel
                         editorProjectileMultiplier = Math.Clamp(multiplier, 1, 128);
                     else if (key == "uiTheme" && int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int theme))
                         uiTheme = Math.Clamp(theme, 0, UiAccents.Length - 1);
+                    else if (key == "uiBackgroundImagePath")
+                        uiBackgroundImagePath = value;
+                    else if (key == "uiBackgroundOpacity" && int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int opacity))
+                        uiBackgroundOpacity = Math.Clamp(opacity, 10, 100);
                     else if (key == "defenseOverride" && int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int defense))
                         defenseOverride = Math.Clamp(defense, 0, 9999);
                     else if (key == "serverMode" && Enum.TryParse(value, true, out ServerMode loadedMode))
@@ -4955,6 +4966,8 @@ internal static partial class HerosModPanel
         lines.Add("fpsStabilizerThreshold=" + fpsStabilizerThreshold.ToString(CultureInfo.InvariantCulture));
         lines.Add("editorProjectileMultiplier=" + Math.Clamp(editorProjectileMultiplier, 1, 128).ToString(CultureInfo.InvariantCulture));
         lines.Add("uiTheme=" + uiTheme.ToString(CultureInfo.InvariantCulture));
+        lines.Add("uiBackgroundImagePath=" + (uiBackgroundImagePath ?? string.Empty));
+        lines.Add("uiBackgroundOpacity=" + uiBackgroundOpacity.ToString(CultureInfo.InvariantCulture));
         lines.Add("defenseOverride=" + defenseOverride.ToString(CultureInfo.InvariantCulture));
         lines.Add("serverMode=" + serverMode.ToString());
         lines.Add("soundVolumeBeforeMute=" + soundVolumeBeforeMute.ToString(CultureInfo.InvariantCulture));
@@ -5070,6 +5083,90 @@ internal static partial class HerosModPanel
         return removed;
     }
 
+    private static void DrawCustomPanelBackground(SpriteBatch sb, Rectangle panel)
+    {
+        if (!uiBackgroundEnabled || uiBackgroundTexture == null || uiBackgroundTexture.IsDisposed)
+            return;
+
+        try
+        {
+            // Se estira al panel completo; el tinte alfa deja el texto y los controles legibles.
+            sb.Draw(uiBackgroundTexture, panel, Color.White * (Math.Clamp(uiBackgroundOpacity, 10, 100) / 100f));
+        }
+        catch (ObjectDisposedException)
+        {
+            uiBackgroundTexture = null;
+            uiBackgroundEnabled = false;
+            uiBackgroundNotice = "La textura dejó de estar disponible; vuelve a cargarla.";
+        }
+    }
+
+    private static void LoadCustomPanelBackground()
+    {
+        try
+        {
+            string path = (uiBackgroundImagePath ?? string.Empty).Trim().Trim('"');
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            {
+                uiBackgroundNotice = "No se encontró el archivo indicado.";
+                SetStatus(uiBackgroundNotice);
+                return;
+            }
+
+            FileInfo info = new FileInfo(path);
+            if (info.Length <= 0 || info.Length > 20 * 1024 * 1024)
+            {
+                uiBackgroundNotice = "La imagen debe pesar entre 1 byte y 20 MB.";
+                SetStatus(uiBackgroundNotice);
+                return;
+            }
+
+            string extension = Path.GetExtension(path).ToLowerInvariant();
+            if (extension != ".png" && extension != ".jpg" && extension != ".jpeg")
+            {
+                uiBackgroundNotice = "Formato no compatible. Usa PNG o JPG.";
+                SetStatus(uiBackgroundNotice);
+                return;
+            }
+
+            Texture2D loaded;
+            using (FileStream stream = File.OpenRead(path))
+                loaded = Texture2D.FromStream(Main.graphics.GraphicsDevice, stream);
+
+            if (loaded.Width > 8192 || loaded.Height > 8192)
+            {
+                loaded.Dispose();
+                uiBackgroundNotice = "La imagen supera el límite de 8192 × 8192.";
+                SetStatus(uiBackgroundNotice);
+                return;
+            }
+
+            UnloadCustomPanelBackground();
+            uiBackgroundTexture = loaded;
+            uiBackgroundImagePath = path;
+            uiBackgroundEnabled = true;
+            uiBackgroundNotice = "Imagen cargada correctamente.";
+            SetStatus("Fondo personalizado cargado y activado.");
+            SaveSettingsIfChanged(true);
+        }
+        catch (Exception ex)
+        {
+            uiBackgroundNotice = "Error al cargar imagen: " + ex.Message;
+            SetStatus(uiBackgroundNotice);
+        }
+    }
+
+    private static void UnloadCustomPanelBackground()
+    {
+        try
+        {
+            if (uiBackgroundTexture != null && !uiBackgroundTexture.IsDisposed)
+                uiBackgroundTexture.Dispose();
+        }
+        catch { }
+        uiBackgroundTexture = null;
+    }
+
     private static void DrawCustomizeTab(SpriteBatch sb, Texture2D pixel, Rectangle panel, ref int y, Point mouse)
     {
         DrawSectionHeader(sb, panel, ref y, "Personalizar interfaz");
@@ -5105,9 +5202,51 @@ internal static partial class HerosModPanel
         {
             uiTheme = 0;
             uiHighContrast = false;
+            uiBackgroundEnabled = false;
+            uiBackgroundOpacity = 48;
+            UnloadCustomPanelBackground();
             SetStatus("Apariencia predeterminada restaurada.");
         }
-        y += RowH + 18;
+        y += RowH + 12;
+
+        DrawSectionHeader(sb, panel, ref y, "Imagen de fondo personalizada");
+        Utils.DrawBorderString(sb, "PNG o JPG · pega la ruta completa del archivo:", new Vector2(panel.X + Pad, y + 3), Color.LightGray, 0.62f);
+        y += 22;
+        DrawTextField(sb, pixel, new Rectangle(panel.X + Pad, y, panel.Width - Pad * 2 - 132, 26), 70,
+            uiBackgroundImagePath, mouse, @"C:\Users\pc\Pictures\hero-ui.png");
+        if (DrawButton(sb, pixel, new Rectangle(panel.Right - Pad - 124, y, 124, 26), "Cargar imagen", mouse, new Color(45, 95, 125)))
+            LoadCustomPanelBackground();
+        y += 32;
+
+        if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad, y, 155, 25),
+            uiBackgroundEnabled ? "Fondo: ACTIVADO" : "Fondo: desactivado", mouse,
+            uiBackgroundEnabled ? UiAccent : UiTabColor))
+        {
+            uiBackgroundEnabled = uiBackgroundTexture != null && !uiBackgroundEnabled;
+            SetStatus(uiBackgroundEnabled ? "Fondo personalizado activado." : "Fondo personalizado desactivado.");
+        }
+        if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad + 163, y, 105, 25), "25%", mouse,
+            uiBackgroundOpacity == 25 ? UiAccent : UiTabColor)) uiBackgroundOpacity = 25;
+        if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad + 274, y, 105, 25), "50%", mouse,
+            uiBackgroundOpacity == 50 ? UiAccent : UiTabColor)) uiBackgroundOpacity = 50;
+        if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad + 385, y, 105, 25), "75%", mouse,
+            uiBackgroundOpacity == 75 ? UiAccent : UiTabColor)) uiBackgroundOpacity = 75;
+        if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad + 496, y, 105, 25), "100%", mouse,
+            uiBackgroundOpacity == 100 ? UiAccent : UiTabColor)) uiBackgroundOpacity = 100;
+        y += 30;
+        string imageState = uiBackgroundTexture == null ? uiBackgroundNotice :
+            "Imagen lista: " + Path.GetFileName(uiBackgroundImagePath) + " · opacidad " + uiBackgroundOpacity + "%";
+        Utils.DrawBorderString(sb, imageState, new Vector2(panel.X + Pad, y), new Color(175, 205, 225), 0.60f);
+        y += 24;
+        if (DrawButton(sb, pixel, new Rectangle(panel.X + Pad, y, 190, 24), "Quitar imagen", mouse, new Color(105, 55, 58)))
+        {
+            UnloadCustomPanelBackground();
+            uiBackgroundImagePath = string.Empty;
+            uiBackgroundEnabled = false;
+            uiBackgroundNotice = "Imagen eliminada de la interfaz.";
+            SetStatus("Fondo personalizado quitado.");
+        }
+        y += 32;
 
         DrawSectionHeader(sb, panel, ref y, "Vista previa");
         var preview = new Rectangle(panel.X + Pad, y, Width - Pad * 2, 76);
@@ -5120,7 +5259,7 @@ internal static partial class HerosModPanel
         Utils.DrawBorderString(sb, "Botón normal", new Vector2(preview.X + 162, preview.Y + 39), Color.White, 0.68f);
         y += 91;
 
-        Utils.DrawBorderString(sb, "Los cambios son visuales y duran mientras siga abierta esta sesión del juego.",
+        Utils.DrawBorderString(sb, "Tema, imagen y opacidad se guardan en HerosModPanel.settings.",
             new Vector2(panel.X + Pad, y), new Color(235, 195, 120), 0.66f);
         y += 20;
         Utils.DrawBorderString(sb, "Consejo: arrastra la barra superior para mover el panel y usa F8 para abrir/cerrar.",
@@ -6254,6 +6393,8 @@ internal static partial class HerosModPanel
             bookmarkYInput = Main.GetInputText(bookmarkYInput);
         else if (activeField == 34)
             bookmarkNameInput = Main.GetInputText(bookmarkNameInput);
+        else if (activeField == 70)
+            uiBackgroundImagePath = Main.GetInputText(uiBackgroundImagePath ?? string.Empty);
 
         if (Main.inputTextEnter || Main.inputTextEscape)
         {
