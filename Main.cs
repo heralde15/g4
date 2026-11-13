@@ -39914,7 +39914,7 @@ public partial class Main : Game
 					return true;
 				}),
 				new LegacyGameInterfaceLayer("Unified: Admin Panel", delegate {
-					DrawInterface_4_2_AdminPanel();
+					HerosModPanel.Draw(spriteBatch);
 					return true;
 				}, InterfaceScaleType.UI),
 				new LegacyGameInterfaceLayer("Vanilla: Gamepad Lock On", delegate {
