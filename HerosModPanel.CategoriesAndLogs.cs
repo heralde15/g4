@@ -62,6 +62,15 @@ internal static partial class HerosModPanel
         int cols = 2;
         int width = (panel.Width - Pad * 2 - 8) / cols;
         int baseY = y;
+        void ActionButton(string label, string command, int index)
+        {
+            int row = index / cols;
+            int col = index % cols;
+            Rectangle rect = new(panel.X + Pad + col * (width + 8), baseY + row * 31, width, 27);
+            if (DrawButton(sb, pixel, rect, label, mouse, new Color(120, 75, 55)))
+                ExecuteLocalConsoleCommand(command);
+        }
+
         void ToggleButton(string label, string feature, bool current, int index)
         {
             int row = index / cols;
@@ -108,6 +117,7 @@ internal static partial class HerosModPanel
                 ToggleButton("Silenciar sonidos", "mute", muteGameSoundsEnabled, 0);
                 ToggleButton("Tienda NPC gratis", "shopfree", npcShopFreeEnabled, 1);
                 ToggleButton("Minions infinitos", "minions", infiniteMinionsEnabled, 2);
+                ActionButton("Eliminar proyectiles propios", ".killprojs", 3);
                 break;
             case HeroCheatGroup.Rendimiento:
                 ToggleButton("Anti-Lag", "antilag", antiLagEnabled, 0);
