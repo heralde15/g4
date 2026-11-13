@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Xna.Framework;
 using XnaColor = Microsoft.Xna.Framework.Color;
 using Microsoft.Xna.Framework.Graphics;
 using SixLabors.ImageSharp;
