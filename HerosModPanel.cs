@@ -5306,6 +5306,32 @@ internal static partial class HerosModPanel
         };
 
         bool Toggle(bool current) => requestedState ?? !current;
+
+        // Atajos directos: permiten activar/desactivar funciones sin escribir ".toggle".
+        string directFeature = command switch
+        {
+            ".reach" => "reach",
+            ".nofall" => "nofall",
+            ".noknockback" => "noknockback",
+            ".antidebuff" => "antidebuff",
+            ".breath" => "breath",
+            ".minions" => "minions",
+            ".lifelock" => "lifelock",
+            ".luck" => "luck",
+            ".antilag" => "antilag",
+            ".effects" => "effects",
+            ".projectiles" => "projectiles",
+            ".fps" => "fps",
+            ".mute" => "mute",
+            ".shopfree" => "shopfree",
+            _ => string.Empty
+        };
+        if (directFeature.Length > 0)
+        {
+            ExecuteLocalConsoleCommand(".toggle " + directFeature + (argument.Length > 0 ? " " + argument : string.Empty));
+            return;
+        }
+
         switch (command)
         {
             case ".cheats":
@@ -5320,7 +5346,7 @@ internal static partial class HerosModPanel
                 break;
             case ".help":
             case ".ayuda":
-                commandConsoleOutput = ".helpall = lista completa · .toggle <función> [on/off] · .hudpos <posición> · .buff <ID> [segundos] · .log [on/off] · .logall · .logworld · .logcombat · .logsystem · .lognpc · .logperformance · .logitems · .logfile · .logstatus · .logclear · .help2";
+                commandConsoleOutput = ".helpall = lista completa · .toggle <función> [on/off] · atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree [on/off] · .hudpos <posición> · .buff <ID> [segundos] · .log [on/off] · .logall · .logworld · .logcombat · .logsystem · .lognpc · .logperformance · .logitems · .logfile · .logstatus · .logclear · .help2";
                 break;
             case ".log":
             case ".eventlog":
@@ -5408,7 +5434,7 @@ internal static partial class HerosModPanel
                 break;
             case ".helpfeatures":
             case ".helpfunciones":
-                commandConsoleOutput = "TOGGLES: .toggle god|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree [on/off] · .hud [on/off] · .hudpos 0-5 · .hudinfo <categoria> [on/off] · .buff <ID> [segundos] · .heal · .debuffclear · .clearhostiles. En multijugador el servidor puede revertir cambios locales.";
+                commandConsoleOutput = "TOGGLES: .toggle god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree [on/off]. Atajos directos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree [on/off] · acciones: .heal .debuffclear .killprojs · HUD: .hud [on/off] .hudpos 0-5 .hudinfo <categoria> [on/off]. En multijugador el servidor puede revertir cambios locales.";
                 break;
             case ".hudinfo":
                 {
