@@ -63,14 +63,20 @@ internal static partial class HerosModPanel
                 for (int i = 0; i < frameCount; i++)
                 {
                     ImageFrame<Rgba32> sourceFrame = image.Frames[i];
-                    Rgba32[] sourcePixels = new Rgba32[width * height];
+                    int sourceStride = sourceFrame.PixelBuffer.RowStride;
+                    Rgba32[] sourcePixels = new Rgba32[sourceStride * height];
                     sourceFrame.CopyPixelDataTo(sourcePixels);
 
-                    XnaColor[] texturePixels = new XnaColor[sourcePixels.Length];
-                    for (int pixelIndex = 0; pixelIndex < sourcePixels.Length; pixelIndex++)
+                    XnaColor[] texturePixels = new XnaColor[width * height];
+                    for (int row = 0; row < height; row++)
                     {
-                        Rgba32 color = sourcePixels[pixelIndex];
-                        texturePixels[pixelIndex] = new XnaColor(color.R, color.G, color.B, color.A);
+                        int sourceRow = row * sourceStride;
+                        int destinationRow = row * width;
+                        for (int column = 0; column < width; column++)
+                        {
+                            Rgba32 color = sourcePixels[sourceRow + column];
+                            texturePixels[destinationRow + column] = new XnaColor(color.R, color.G, color.B, color.A);
+                        }
                     }
 
                     var texture = new Texture2D(Main.graphics.GraphicsDevice, width, height);
