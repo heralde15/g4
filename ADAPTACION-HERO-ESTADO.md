@@ -18,6 +18,7 @@ Este documento distingue las funciones realmente conectadas a la UI/consola de l
 - Suerte aumentada.
 - Alcance extendido.
 - Auto eliminar ganchos propios.
+- Auto Fish local: selecciona la mejor caña de la barra rápida, comprueba cebo y lanza/recoge el flotador automáticamente.
 
 ### Movimiento
 - Vuelo local, bloqueado en modo COMANDOS de multijugador.
@@ -56,6 +57,8 @@ Este documento distingue las funciones realmente conectadas a la UI/consola de l
 .forceequip <ID accesorio> [cantidad 1-10]
 .forceequips [on/off]
 .clearforceequips
+.toggle autofish [on/off]
+.autofish [on/off]
 ```
 
 También se pueden usar:
@@ -75,7 +78,7 @@ También se pueden usar:
 
 - Combat: Aimbot y opción No Combat IFrames para NPC (la variante local ya está adaptada).
 - LocalPlayer: Mount Tweaks, Prevent Item Consumption, Prevent Server Modification, y revisar AntiDebuff/otros comportamientos. Forced Equips tiene una adaptación local limitada a accesorios.
-- Misc: Auto Fish, Auto Butcher, Butcher, Particle Annoy y variantes de eliminación/revelado.
+- Misc: Auto Butcher, Butcher y Particle Annoy. Auto Fish ya tiene una primera adaptación local; falta probarla en juego y ampliar sus filtros/opciones.
 - Travel: Map TP, Mouse TP, Noclip, TP Bypass.
 - Visual: Fullbright, Hitbox Display, Smooth Scrolling, Tile Cursor, Tile ESP, Track Players.
 
