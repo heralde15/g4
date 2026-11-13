@@ -7,6 +7,7 @@ Este documento distingue las funciones realmente conectadas a la UI/consola de l
 ## Funciones disponibles para probar
 
 ### Jugador
+- Forced Equips (local): aplica beneficios funcionales de accesorios configurados mediante su ID. Solo acepta accesorios; no crea ni entrega objetos.
 - God Mode local.
 - Sin daño de caída.
 - Sin retroceso.
@@ -52,6 +53,9 @@ Este documento distingue las funciones realmente conectadas a la UI/consola de l
 .killprojs
 .clearprojectiles
 .toggle noiframes [on/off]
+.forceequip <ID accesorio> [cantidad 1-10]
+.forceequips [on/off]
+.clearforceequips
 ```
 
 También se pueden usar:
@@ -70,7 +74,7 @@ También se pueden usar:
 ## Pendiente de adaptación
 
 - Combat: Aimbot y opción No Combat IFrames para NPC (la variante local ya está adaptada).
-- LocalPlayer: Forced Equips, Mount Tweaks, Prevent Item Consumption, Prevent Server Modification, y revisar AntiDebuff/otros comportamientos.
+- LocalPlayer: Mount Tweaks, Prevent Item Consumption, Prevent Server Modification, y revisar AntiDebuff/otros comportamientos. Forced Equips tiene una adaptación local limitada a accesorios.
 - Misc: Auto Fish, Auto Butcher, Butcher, Particle Annoy y variantes de eliminación/revelado.
 - Travel: Map TP, Mouse TP, Noclip, TP Bypass.
 - Visual: Fullbright, Hitbox Display, Smooth Scrolling, Tile Cursor, Tile ESP, Track Players.
