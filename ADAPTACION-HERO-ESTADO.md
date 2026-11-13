@@ -67,6 +67,18 @@ También se pueden usar:
 .toggle autoclearitems [on/off]
 ```
 
+### Consola HERO renovada
+
+- Interfaz rediseñada con panel más ancho, encabezado, estado de sesión (modo de juego, FPS y resolución), salida más legible y campo de entrada destacado.
+- Historial de hasta 40 comandos durante la sesión; usa las flechas **↑ / ↓** para recuperar comandos anteriores.
+- Nuevos comandos de consulta:
+  - `.history`: muestra los últimos comandos utilizados.
+  - `.clear` / `.cls`: limpia el mensaje actual de salida.
+  - `.coords` / `.coordenadas`: muestra posición en tiles y velocidad del personaje.
+  - `.time` / `.hora`: muestra hora del mundo y estado del clima/eventos.
+- La consola conserva Ctrl derecho para abrir/cerrar y Enter o Alt derecho para ejecutar.
+- El historial es temporal: se reinicia al cerrar el juego; no altera archivos ni datos del mundo.
+
 ## Restricciones
 
 - `.clearitems` y `.autoclearitems` solo funcionan en un jugador; no modifican drops de servidores.
