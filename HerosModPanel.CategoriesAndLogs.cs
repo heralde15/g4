@@ -96,7 +96,8 @@ internal static partial class HerosModPanel
                 ToggleButton("Minions infinitos", "minions", infiniteMinionsEnabled, 6);
                 ToggleButton("Suerte aumentada", "luck", luckBoostEnabled, 7);
                 ToggleButton("Alcance extendido", "reach", extendedReachEnabled, 8);
-                ActionButton("Curar vida y maná", ".heal", 9);
+                ToggleButton("Auto eliminar ganchos", "autokillhooks", autoKillHooksEnabled, 9);
+                ActionButton("Curar vida y maná", ".heal", 10);
                 ActionButton("Limpiar debuffs", ".debuffclear", 10);
                 break;
             case HeroCheatGroup.Movimiento:
@@ -120,9 +121,10 @@ internal static partial class HerosModPanel
             case HeroCheatGroup.Mundo:
                 ToggleButton("Tienda NPC gratis", "shopfree", npcShopFreeEnabled, 0);
                 ToggleButton("Suerte aumentada", "luck", luckBoostEnabled, 1);
-                ActionButton("Revelar mapa local", ".revealmap", 2);
-                ActionButton("Eliminar objetos del suelo", ".clearitems", 3);
-                ToggleButton("Auto limpiar objetos (SP)", "autoclearitems", autoClearWorldItemsEnabled, 4);
+                ToggleButton("Auto eliminar ganchos", "autokillhooks", autoKillHooksEnabled, 2);
+                ActionButton("Revelar mapa local", ".revealmap", 3);
+                ActionButton("Eliminar objetos del suelo", ".clearitems", 4);
+                ToggleButton("Auto limpiar objetos (SP)", "autoclearitems", autoClearWorldItemsEnabled, 5);
                 break;
             case HeroCheatGroup.Utilidades:
                 ToggleButton("Silenciar sonidos", "mute", muteGameSoundsEnabled, 0);
@@ -136,6 +138,7 @@ internal static partial class HerosModPanel
                 ActionButton("Revelar mapa", ".revealmap", 8);
                 ActionButton("Limpiar objetos (SP)", ".clearitems", 9);
                 ToggleButton("Auto limpiar objetos", "autoclearitems", autoClearWorldItemsEnabled, 10);
+                ToggleButton("Auto eliminar ganchos", "autokillhooks", autoKillHooksEnabled, 11);
                 break;
             case HeroCheatGroup.Rendimiento:
                 ToggleButton("Anti-Lag", "antilag", antiLagEnabled, 0);
