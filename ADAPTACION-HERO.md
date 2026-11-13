@@ -25,3 +25,11 @@ Esta es una primera pasada funcional de la UI/consola y de los cheats locales de
 ## Validación
 
 No se pudo ejecutar `dotnet build` con este paquete porque el ZIP recibido no incluye `Terraria.csproj`, solución ni dependencias del proyecto. La entrega es una adaptación de código fuente pendiente de compilar en el árbol completo de Terraria Unified.
+
+
+## Segunda pasada: alcance extendido local
+
+- Se añadió el toggle `reach` a la categoría Jugador y al comando `.toggle reach [on/off]`.
+- La función aumenta `tileRangeX` y `tileRangeY` del personaje local a 60 mientras está activa.
+- Los valores originales se guardan y se restauran al desactivar la función o cambiar de personaje; no modifica otros jugadores ni envía paquetes al servidor.
+- La adaptación se implementa en `HerosModPanel.AdaptedFeatures.cs` y se conecta al ciclo `UpdateLogic()` existente.
