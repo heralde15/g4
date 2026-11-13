@@ -5116,6 +5116,7 @@ internal static partial class HerosModPanel
             string path = (uiBackgroundImagePath ?? string.Empty).Trim().Trim('"');
             if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             {
+                uiBackgroundEnabled = false;
                 uiBackgroundNotice = "No se encontró el archivo indicado.";
                 SetStatus(uiBackgroundNotice);
                 return;
@@ -5124,6 +5125,7 @@ internal static partial class HerosModPanel
             FileInfo info = new FileInfo(path);
             if (info.Length <= 0 || info.Length > 20 * 1024 * 1024)
             {
+                uiBackgroundEnabled = false;
                 uiBackgroundNotice = "La imagen debe pesar entre 1 byte y 20 MB.";
                 SetStatus(uiBackgroundNotice);
                 return;
@@ -5132,6 +5134,7 @@ internal static partial class HerosModPanel
             string extension = Path.GetExtension(path).ToLowerInvariant();
             if (extension != ".png" && extension != ".jpg" && extension != ".jpeg")
             {
+                uiBackgroundEnabled = false;
                 uiBackgroundNotice = "Formato no compatible. Usa PNG o JPG.";
                 SetStatus(uiBackgroundNotice);
                 return;
@@ -5144,6 +5147,7 @@ internal static partial class HerosModPanel
             if (loaded.Width > 8192 || loaded.Height > 8192)
             {
                 loaded.Dispose();
+                uiBackgroundEnabled = false;
                 uiBackgroundNotice = "La imagen supera el límite de 8192 × 8192.";
                 SetStatus(uiBackgroundNotice);
                 return;
