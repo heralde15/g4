@@ -93,10 +93,13 @@ internal static partial class HerosModPanel
                 ToggleButton("Minions infinitos", "minions", infiniteMinionsEnabled, 6);
                 ToggleButton("Suerte aumentada", "luck", luckBoostEnabled, 7);
                 ToggleButton("Alcance extendido", "reach", extendedReachEnabled, 8);
+                ActionButton("Curar vida y maná", ".heal", 9);
+                ActionButton("Limpiar debuffs", ".debuffclear", 10);
                 break;
             case HeroCheatGroup.Movimiento:
                 ToggleButton("Vuelo libre", "fly", flyEnabled, 0);
                 ToggleButton("Modo fantasma visual", "ghost", ghostModeEnabled, 1);
+                ActionButton("Curar / restaurar", ".heal", 2);
                 break;
             case HeroCheatGroup.Combate:
                 ToggleButton("God Mode local", "god", godmodeEnabled, 0);
@@ -108,6 +111,8 @@ internal static partial class HerosModPanel
                 ToggleButton("Modo fantasma", "ghost", ghostModeEnabled, 0);
                 ToggleButton("Reducir efectos visuales", "effects", antiEffectsEnabled, 1);
                 ToggleButton("Silenciar sonidos", "mute", muteGameSoundsEnabled, 2);
+                ActionButton("Ver estado", ".status", 3);
+                ActionButton("Informe completo", ".report", 4);
                 break;
             case HeroCheatGroup.Mundo:
                 ToggleButton("Tienda NPC gratis", "shopfree", npcShopFreeEnabled, 0);
@@ -118,6 +123,10 @@ internal static partial class HerosModPanel
                 ToggleButton("Tienda NPC gratis", "shopfree", npcShopFreeEnabled, 1);
                 ToggleButton("Minions infinitos", "minions", infiniteMinionsEnabled, 2);
                 ActionButton("Eliminar proyectiles propios", ".killprojs", 3);
+                ActionButton("Limpiar debuffs", ".debuffclear", 4);
+                ActionButton("Curar vida y maná", ".heal", 5);
+                ActionButton("Ver posición", ".pos", 6);
+                ActionButton("Ver inventario", ".inventory", 7);
                 break;
             case HeroCheatGroup.Rendimiento:
                 ToggleButton("Anti-Lag", "antilag", antiLagEnabled, 0);
@@ -128,11 +137,11 @@ internal static partial class HerosModPanel
         }
         y += 150;
         DrawSectionHeader(sb, panel, ref y, "CONSOLA RÁPIDA");
-        string[] quick = { ".cheats", ".status", ".report", ".diagnostics", ".helpall" };
-        int qWidth = (panel.Width - Pad * 2 - 4 * 5) / 5;
+        string[] quick = { ".cheats", ".status", ".report", ".diagnostics", ".pos", ".players", ".logstatus", ".helpall" };
+        int qWidth = (panel.Width - Pad * 2 - 7 * 4) / 8;
         for (int i = 0; i < quick.Length; i++)
         {
-            Rectangle rect = new(panel.X + Pad + i * (qWidth + 5), y, qWidth, 24);
+            Rectangle rect = new(panel.X + Pad + i * (qWidth + 4), y, qWidth, 24);
             if (DrawButton(sb, pixel, rect, quick[i], mouse))
             {
                 ExecuteLocalConsoleCommand(quick[i]);
