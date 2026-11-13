@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using Terraria;
+using Terraria.GameContent;
 
 namespace Terraria.Unified.Features;
 
@@ -16,6 +18,10 @@ internal static partial class HerosModPanel
     private static bool autoClearWorldItemsEnabled;
     private static int autoClearWorldItemsTimer;
     private const int AutoClearWorldItemsInterval = 600;
+
+    // Accesorios configurados manualmente; se aplican solo al jugador local.
+    private static bool forcedEquipsEnabled;
+    private static readonly Dictionary<int, int> forcedEquipItems = new();
 
     // Desactiva los frames de invulnerabilidad del jugador local (no afecta NPCs).
     private static bool noCombatIFramesEnabled;
@@ -189,6 +195,31 @@ internal static partial class HerosModPanel
 
         Main.refreshMap = true;
         return true;
+    }
+
+    private static void ApplyForcedEquips()
+    {
+        if (!forcedEquipsEnabled || Main.LocalPlayer == null || !Main.LocalPlayer.active || Main.LocalPlayer.dead)
+            return;
+
+        Player player = Main.LocalPlayer;
+        foreach (KeyValuePair<int, int> entry in forcedEquipItems)
+        {
+            if (!ContentSamples.ItemsByType.TryGetValue(entry.Key, out Item item) || item == null || item.IsAir || !item.accessory)
+                continue;
+
+            int amount = Math.Clamp(entry.Value, 1, 10);
+            for (int i = 0; i < amount; i++)
+            {
+                player.GrantArmorBenefits(item, force: true);
+                player.ApplyEquipFunctional(0, item, force: true);
+            }
+
+            if (entry.Key == 4743)
+                player.hasFootball = true;
+            if (entry.Key == 4760)
+                player.hasRaisableShield = true;
+        }
     }
 
     private static void ApplyNoCombatIFrames()
