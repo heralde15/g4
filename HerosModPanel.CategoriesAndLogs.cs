@@ -112,7 +112,7 @@ internal static partial class HerosModPanel
                 ToggleButton("Reducir proyectiles", "projectiles", antiLagProjectilesEnabled, 3);
                 ToggleButton("Sin i-frames (local)", "noiframes", noCombatIFramesEnabled, 4);
                 ToggleButton("Forced Equips", "forceequips", forcedEquipsEnabled, 5);
-                ActionButton("Añadir accesorio por ID", ".helpforceequips", 6);
+                ActionButton("Ayuda Forced Equips", ".helpforceequips", 6);
                 break;
             case HeroCheatGroup.Visual:
                 ToggleButton("Modo fantasma", "ghost", ghostModeEnabled, 0);
