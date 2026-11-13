@@ -68,6 +68,10 @@ internal static partial class HerosModPanel
     private static string commandConsoleInput = string.Empty;
     private static string commandConsoleOutput = "Consola: Ctrl derecho abre/cierra · Alt derecho o Enter ejecuta · Esc cierra.";
     private static int commandConsoleOutputTimer;
+    // Historial de comandos de la consola HERO (solo memoria de la sesión).
+    private static readonly List<string> commandConsoleHistory = new();
+    private static int commandConsoleHistoryIndex = -1;
+    private const int CommandConsoleHistoryLimit = 40;
 
     // Registro de eventos HERO en el chat, sin requerir que el panel esté abierto.
     private static bool eventLogEnabled = true;
@@ -5261,42 +5265,58 @@ internal static partial class HerosModPanel
 
     private static void DrawCommandConsole(SpriteBatch sb, Texture2D pixel)
     {
-        int width = Math.Min(760, Main.screenWidth - 32);
-        int height = 190;
+        int width = Math.Min(820, Main.screenWidth - 32);
+        int height = Math.Min(238, Main.screenHeight - 48);
         int x = Math.Max(16, (Main.screenWidth - width) / 2);
-        int y = Math.Max(24, Main.screenHeight - height - 70);
+        int y = Math.Max(20, Main.screenHeight - height - 54);
         var panel = new Rectangle(x, y, width, height);
-        sb.Draw(pixel, panel, new Color(7, 9, 15, 245));
-        sb.Draw(pixel, new Rectangle(x, y, width, 3), new Color(110, 220, 255));
-        sb.Draw(pixel, new Rectangle(x + 1, y + 1, width - 2, height - 2), new Color(17, 22, 34, 245));
-        Utils.DrawBorderString(sb, "CONSOLA · TERRARIA UNIFIED", new Vector2(x + 12, y + 10), new Color(110, 220, 255), 0.82f);
-        Utils.DrawBorderString(sb, "Ctrl derecho: cerrar  ·  Alt derecho/Enter: ejecutar  ·  Esc: cerrar", new Vector2(x + 12, y + 34), Color.LightGray, 0.62f);
+        Color accent = new Color(110, 220, 255);
+        sb.Draw(pixel, panel, new Color(5, 8, 15, 248));
+        sb.Draw(pixel, new Rectangle(x, y, width, 3), accent);
+        sb.Draw(pixel, new Rectangle(x + 1, y + 1, width - 2, height - 2), new Color(17, 23, 36, 246));
+
+        Utils.DrawBorderString(sb, "H E R O  /  CONSOLA", new Vector2(x + 14, y + 10), accent, 0.82f);
+        string mode = Main.gameMenu ? "MENÚ PRINCIPAL" : Main.netMode == 1 ? "MULTIJUGADOR" : "UN JUGADOR";
+        string status = mode + "  ·  FPS " + Main.frameRate + "  ·  " + Main.screenWidth + "x" + Main.screenHeight;
+        float statusWidth = FontAssets.MouseText.Value.MeasureString(status).X * 0.56f;
+        Utils.DrawBorderString(sb, status, new Vector2(x + width - statusWidth - 14, y + 13), new Color(155, 175, 198), 0.56f);
+        sb.Draw(pixel, new Rectangle(x + 12, y + 36, width - 24, 1), new Color(65, 83, 108));
+
+        Utils.DrawBorderString(sb, "SALIDA", new Vector2(x + 14, y + 45), new Color(130, 155, 185), 0.54f);
         string output = commandConsoleOutput ?? string.Empty;
         var font = FontAssets.MouseText.Value;
-        float maxOutputWidth = width - 24;
+        float maxOutputWidth = width - 32;
         var outputLines = new List<string>();
         string currentLine = string.Empty;
         foreach (string word in output.Split(' ', StringSplitOptions.RemoveEmptyEntries))
         {
             string candidate = string.IsNullOrEmpty(currentLine) ? word : currentLine + " " + word;
-            if (font.MeasureString(candidate).X * 0.62f > maxOutputWidth && !string.IsNullOrEmpty(currentLine))
+            if (font.MeasureString(candidate).X * 0.60f > maxOutputWidth && !string.IsNullOrEmpty(currentLine))
             {
                 outputLines.Add(currentLine);
                 currentLine = word;
-                if (outputLines.Count >= 3) break;
+                if (outputLines.Count >= 5) break;
             }
             else currentLine = candidate;
         }
-        if (outputLines.Count < 3 && !string.IsNullOrEmpty(currentLine)) outputLines.Add(currentLine);
-        if (outputLines.Count == 3 && output.Length > string.Join(" ", outputLines).Length)
-            outputLines[2] = outputLines[2].TrimEnd('.') + " …";
-        for (int i = 0; i < outputLines.Count && i < 3; i++)
-            Utils.DrawBorderString(sb, outputLines[i], new Vector2(x + 12, y + 59 + i * 18), Color.White, 0.62f);
-        var inputRect = new Rectangle(x + 10, y + height - 38, width - 20, 27);
-        sb.Draw(pixel, inputRect, new Color(35, 43, 59));
-        string input = "> " + commandConsoleInput;
-        if (Main.timeForVisualEffects % 60 < 30) input += "|";
-        Utils.DrawBorderString(sb, input, new Vector2(inputRect.X + 7, inputRect.Y + 5), Color.White, 0.72f);
+        if (outputLines.Count < 5 && !string.IsNullOrEmpty(currentLine))
+            outputLines.Add(currentLine);
+        if (outputLines.Count == 5 && output.Length > string.Join(" ", outputLines).Length)
+            outputLines[4] = outputLines[4].TrimEnd('.') + " …";
+        if (outputLines.Count == 0)
+            outputLines.Add("Escribe .help para consultar los comandos disponibles.");
+        for (int i = 0; i < outputLines.Count && i < 5; i++)
+            Utils.DrawBorderString(sb, outputLines[i], new Vector2(x + 14, y + 63 + i * 18),
+                i == 0 ? Color.White : new Color(195, 205, 220), 0.60f);
+
+        var inputRect = new Rectangle(x + 12, y + height - 43, width - 24, 28);
+        sb.Draw(pixel, inputRect, new Color(31, 43, 62));
+        sb.Draw(pixel, new Rectangle(inputRect.X, inputRect.Y, 3, inputRect.Height), accent);
+        string input = "HERO > " + (commandConsoleInput ?? string.Empty);
+        if (Main.timeForVisualEffects % 60 < 30) input += "▌";
+        Utils.DrawBorderString(sb, input, new Vector2(inputRect.X + 9, inputRect.Y + 5), Color.White, 0.68f);
+        Utils.DrawBorderString(sb, "ENTER ejecutar  ·  ↑↓ historial  ·  CTRL derecho cerrar  ·  ESC cerrar",
+            new Vector2(x + 14, y + height - 12), new Color(135, 155, 180), 0.48f);
         Main.LocalPlayer.mouseInterface = true;
     }
 
@@ -5311,8 +5331,31 @@ internal static partial class HerosModPanel
             commandConsoleVisible = false;
             Visible = commandConsolePreviousPanelVisible;
             commandConsoleInput = string.Empty;
+            commandConsoleHistoryIndex = -1;
             Main.clrInput();
             return;
+        }
+
+        bool upPressed = Main.keyState.IsKeyDown(Keys.Up) && Main.oldKeyState.IsKeyUp(Keys.Up);
+        bool downPressed = Main.keyState.IsKeyDown(Keys.Down) && Main.oldKeyState.IsKeyUp(Keys.Down);
+        if (upPressed && commandConsoleHistory.Count > 0)
+        {
+            commandConsoleHistoryIndex = commandConsoleHistoryIndex < 0
+                ? commandConsoleHistory.Count - 1
+                : Math.Max(0, commandConsoleHistoryIndex - 1);
+            commandConsoleInput = commandConsoleHistory[commandConsoleHistoryIndex];
+            Main.clrInput();
+        }
+        else if (downPressed && commandConsoleHistoryIndex >= 0)
+        {
+            commandConsoleHistoryIndex++;
+            if (commandConsoleHistoryIndex >= commandConsoleHistory.Count)
+            {
+                commandConsoleHistoryIndex = -1;
+                commandConsoleInput = string.Empty;
+            }
+            else commandConsoleInput = commandConsoleHistory[commandConsoleHistoryIndex];
+            Main.clrInput();
         }
 
         bool rightAltPressed = Main.keyState.IsKeyDown(Keys.RightAlt) && Main.oldKeyState.IsKeyUp(Keys.RightAlt);
@@ -5321,18 +5364,26 @@ internal static partial class HerosModPanel
 
         string command = (commandConsoleInput ?? string.Empty).Trim();
         commandConsoleInput = string.Empty;
+        commandConsoleHistoryIndex = -1;
         Main.clrInput();
         if (command.Length == 0)
             return;
 
+        if (commandConsoleHistory.Count == 0 ||
+            !string.Equals(commandConsoleHistory[commandConsoleHistory.Count - 1], command, StringComparison.Ordinal))
+        {
+            commandConsoleHistory.Add(command);
+            if (commandConsoleHistory.Count > CommandConsoleHistoryLimit)
+                commandConsoleHistory.RemoveAt(0);
+        }
+
         // En el menú principal solo se muestra la consola; las acciones requieren un mundo cargado.
         if (Main.gameMenu)
         {
-            commandConsoleOutput = "Estás en el menú. Entra a un mundo para ejecutar comandos.";
+            commandConsoleOutput = "Estás en el menú. Los comandos de juego estarán disponibles al entrar a un mundo.";
             return;
         }
 
-        // Los comandos con punto son funciones locales de HERO; no se envían al servidor.
         if (command.StartsWith(".", StringComparison.Ordinal))
         {
             ExecuteLocalConsoleCommand(command);
@@ -5341,7 +5392,6 @@ internal static partial class HerosModPanel
 
         if (Main.netMode == 1)
         {
-            // Los comandos normales usan el canal de chat existente; el servidor valida permisos.
             SendCmd(command.StartsWith("/", StringComparison.Ordinal) ? command : "/" + command);
             commandConsoleOutput = "Enviado al servidor: " + command;
         }
@@ -5398,6 +5448,37 @@ internal static partial class HerosModPanel
 
         switch (command)
         {
+            case ".clear":
+            case ".cls":
+                commandConsoleOutput = "Consola limpia. Escribe .help para ver los comandos.";
+                break;
+            case ".history":
+                commandConsoleOutput = commandConsoleHistory.Count == 0
+                    ? "Todavía no hay comandos en el historial."
+                    : "HISTORIAL: " + string.Join("  |  ", commandConsoleHistory.Skip(Math.Max(0, commandConsoleHistory.Count - 8)));
+                break;
+            case ".coords":
+            case ".coordenadas":
+                {
+                    Player cp = Main.LocalPlayer;
+                    commandConsoleOutput = cp != null && cp.active
+                        ? $"POSICIÓN: X={cp.position.X / 16f:0.0}  Y={cp.position.Y / 16f:0.0} tiles  ·  Velocidad={cp.velocity.Length():0.00}"
+                        : "No hay un personaje activo.";
+                    break;
+                }
+            case ".time":
+            case ".hora":
+                {
+                    double ticks = Main.time;
+                    string clock = Main.dayTime
+                        ? TimeSpan.FromSeconds((int)(ticks / 60.0)).ToString(@"hh\:mm")
+                        : TimeSpan.FromSeconds((int)((ticks + 54000.0) / 60.0)).ToString(@"hh\:mm");
+                    commandConsoleOutput = "MUNDO: " + (Main.dayTime ? "Día" : "Noche") + " · " +
+                        clock + " · " + (Main.raining ? "Lluvia" : "Sin lluvia") +
+                        (Main.eclipse ? " · Eclipse" : string.Empty) +
+                        (Main.bloodMoon ? " · Luna de sangre" : string.Empty);
+                    break;
+                }
             case ".cheats":
             case ".categorias":
                 commandConsoleOutput = "CATEGORÍAS HERO: .category jugador|movimiento|combate|visual|mundo|utilidades|rendimiento|todo. Abre HERO > Categorías para controles gráficos. Los toggles disponibles incluyen .god .fly .ghost .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems .autokillhooks .noiframes. Acciones: .heal .debuffclear .killprojs .clearitems .revealmap.";
