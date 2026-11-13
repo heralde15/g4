@@ -5340,7 +5340,7 @@ internal static partial class HerosModPanel
         {
             case ".cheats":
             case ".categorias":
-                commandConsoleOutput = "CATEGORÍAS HERO: .category jugador|movimiento|combate|visual|mundo|utilidades|rendimiento|todo. Abre HERO > Categorías para controles gráficos. Los toggles disponibles son .god .fly .ghost .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree.";
+                commandConsoleOutput = "CATEGORÍAS HERO: .category jugador|movimiento|combate|visual|mundo|utilidades|rendimiento|todo. Abre HERO > Categorías para controles gráficos. Los toggles disponibles incluyen .god .fly .ghost .minions .lifelock .luck .antilag .effects .projectiles .fps .mute .shopfree .autoclearitems. Acciones: .heal .debuffclear .killprojs .clearitems .revealmap.";
                 break;
             case ".category":
             case ".categoria":
@@ -5430,7 +5430,7 @@ internal static partial class HerosModPanel
             case ".helpall":
             case ".helpfull":
             case ".comandos":
-                commandConsoleOutput = "Ayuda por categorías: .help2 / .help3 · registro: .log .logplayers .logdeaths .logbosses .lognpc .logperformance .logfile · HUD: .hud .hudpos .hudinfo · informes: .report .diagnostics .status · jugador: .god .fly .heal .ghost .buff .debuffclear · mundo: .world .biome .clock .nearby .clearhostiles · datos: .server .ping .pos .life .mana .inventory .buffs .counts .players .equipment · funciones: .helpfeatures";
+                commandConsoleOutput = "Ayuda por categorías: .help2 / .help3 · registro: .log .logplayers .logdeaths .logbosses .lognpc .logperformance .logfile · HUD: .hud .hudpos .hudinfo · informes: .report .diagnostics .status · jugador: .god .fly .heal .ghost .buff .debuffclear · mundo: .world .biome .clock .nearby .clearhostiles .clearitems .revealmap · datos: .server .ping .pos .life .mana .inventory .buffs .counts .players .equipment · funciones: .helpfeatures";
                 break;
             case ".helpinfo":
             case ".helpdatos":
