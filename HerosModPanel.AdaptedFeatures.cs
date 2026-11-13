@@ -1,3 +1,4 @@
+using System;
 using Terraria;
 
 namespace Terraria.Unified.Features;
@@ -45,7 +46,6 @@ internal static partial class HerosModPanel
         extendedReachOriginalX = 0;
         extendedReachOriginalY = 0;
     }
-}
 
     // Acción manual: elimina únicamente proyectiles activos propiedad del jugador local.
     // No envía paquetes ni modifica proyectiles de otros jugadores.
@@ -68,3 +68,4 @@ internal static partial class HerosModPanel
 
         return removed;
     }
+}
