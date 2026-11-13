@@ -518,6 +518,7 @@ internal static partial class HerosModPanel
         SetInfiniteMinions(false);
         SetNoFallDamage(false);
         SetNoKnockback(false);
+        forcedEquipsEnabled = false;
         noCombatIFramesEnabled = false;
         lifeLockEnabled = false;
         defenseOverrideEnabled = false;
@@ -637,6 +638,7 @@ internal static partial class HerosModPanel
             ApplyNoFallDamage();
             ApplyNoKnockback();
             ApplyNoCombatIFrames();
+            ApplyForcedEquips();
             if (infiniteBreathEnabled) local.breath = local.breathMax;
             if (antiDebuffEnabled)
             {
@@ -5332,6 +5334,7 @@ internal static partial class HerosModPanel
             ".shopfree" => "shopfree",
             ".autoclearitems" => "autoclearitems",
             ".autokillhooks" => "autokillhooks",
+            ".forceequips" => "forceequips",
             _ => string.Empty
         };
         if (directFeature.Length > 0)
@@ -5536,7 +5539,7 @@ internal static partial class HerosModPanel
                 {
                     if (parts.Length < 2)
                     {
-                        commandConsoleOutput = "Uso: .toggle <god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems|autokillhooks|noiframes> [on/off]";
+                        commandConsoleOutput = "Uso: .toggle <god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems|autokillhooks|noiframes|forceequips> [on/off]";
                         break;
                     }
                     string feature = argument;
@@ -5552,6 +5555,7 @@ internal static partial class HerosModPanel
                     {
                         case "reach": extendedReachEnabled = ToggleFeature(extendedReachEnabled); ApplyExtendedReach(); break;
                         case "noiframes": noCombatIFramesEnabled = ToggleFeature(noCombatIFramesEnabled); break;
+                        case "forceequips": forcedEquipsEnabled = ToggleFeature(forcedEquipsEnabled); break;
                         case "autokillhooks":
                             autoKillHooksEnabled = ToggleFeature(autoKillHooksEnabled);
                             break;
@@ -5648,6 +5652,34 @@ internal static partial class HerosModPanel
                     }
                     break;
                 }
+            case ".helpforceequips":
+                commandConsoleOutput = "Uso: .forceequip <ID accesorio> [cantidad 1-10] · .forceequips on/off · .clearforceequips. Solo accesorios; efectos locales."; 
+                break;
+            case ".forceequip":
+                {
+                    if (parts.Length < 2 || !int.TryParse(parts[1], out int equipId)
+                        || !ContentSamples.ItemsByType.TryGetValue(equipId, out Item equipItem)
+                        || equipItem == null || equipItem.IsAir || !equipItem.accessory)
+                    {
+                        commandConsoleOutput = "Uso: .forceequip <ID de accesorio> [cantidad 1-10]. Solo acepta accesorios válidos.";
+                        break;
+                    }
+                    int amount = 1;
+                    if (parts.Length > 2 && (!int.TryParse(parts[2], out amount) || amount < 1 || amount > 10))
+                    {
+                        commandConsoleOutput = "La cantidad debe estar entre 1 y 10.";
+                        break;
+                    }
+                    forcedEquipItems[equipId] = amount;
+                    forcedEquipsEnabled = true;
+                    commandConsoleOutput = "Accesorio " + equipItem.Name + " añadido a Forced Equips (x" + amount + "). Activa .forceequips para aplicarlo.";
+                    break;
+                }
+            case ".clearforceequips":
+                forcedEquipItems.Clear();
+                forcedEquipsEnabled = false;
+                commandConsoleOutput = "Lista Forced Equips vaciada y función desactivada.";
+                break;
             case ".clearitems":
             case ".deleteitems":
                 {
