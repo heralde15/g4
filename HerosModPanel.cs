@@ -5601,6 +5601,13 @@ internal static partial class HerosModPanel
                     }
                     break;
                 }
+            case ".killprojs":
+            case ".clearprojectiles":
+                {
+                    int removed = KillOwnedProjectilesLocal();
+                    commandConsoleOutput = "Proyectiles propios eliminados localmente: " + removed + ".";
+                    break;
+                }
             case ".help2":
                 commandConsoleOutput = ".god .fly .heal .ghost .minions .lifelock .luck .debuffclear .nearby .players .equipment .help3";
                 break;
