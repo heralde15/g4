@@ -40,3 +40,9 @@ No se pudo ejecutar `dotnet build` con este paquete porque el ZIP recibido no in
 - Se adaptó la acción de referencia **Kill Owned Projectiles** sin depender del NetHelper externo.
 - El comando `.killprojs` (alias `.clearprojectiles`) elimina únicamente los proyectiles activos cuyo propietario es el jugador local.
 - Se añadió un botón manual en **Categorías > Utilidades**. No es automático y no afecta a proyectiles de otros jugadores.
+
+## Corrección de estructura de la adaptación
+
+- Se corrigió `HerosModPanel.AdaptedFeatures.cs`: el método `KillOwnedProjectilesLocal()` había quedado fuera de la clase parcial por una llave de cierre anticipada.
+- Ahora tanto el alcance extendido como la limpieza manual de proyectiles están dentro de `HerosModPanel`, y se añadió la importación explícita de `System` para `Math` y `ReferenceEquals`.
+- Esta corrección evita un error de estructura de C#; todavía debe validarse con la compilación completa del proyecto.
