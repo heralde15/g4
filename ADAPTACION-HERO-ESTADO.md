@@ -98,3 +98,16 @@ Los cambios están guardados en esta rama, pero aún requieren compilación loca
 - UI: Noclip y Mouse TP en Movimiento; Auto Butcher y Butcher manual en Mundo.
 
 Estas funciones todavía requieren build y pruebas en el juego. Auto Butcher no se ejecuta en multijugador para evitar enviar daño local falso al servidor. Map TP usa coordenadas de tiles introducidas en consola; no simula el clic de selección del mapa fullscreen.
+
+
+## Herramientas de análisis HERO
+
+Se añadieron consultas pasivas desde la consola:
+
+- `.bosses` / `.bossscan`: lista jefes activos visibles y su vida.
+- `.hostiles [tiles]` / `.enemigos [tiles]`: muestra hasta 10 enemigos cercanos ordenados por distancia; radio predeterminado 80 tiles y rango permitido 10-500.
+- `.worldscan` / `.scanworld`: resume mundo, tamaño, dificultad, hardmode, clima, jugadores, NPC, hostiles y FPS.
+- `.hero_scan` / `.hero_plugins` / `.pluginscan`: comando oculto de análisis pasivo de conexión y metadatos visibles.
+
+**Límite del análisis de plugins:** el protocolo estándar de Terraria no ofrece al cliente una lista de plugins instalados en el servidor. El escaneo informa esta limitación y no inventa plugins detectados, no intenta leer archivos remotos y no envía paquetes de sondeo. Solo se podrán reconocer plugins si el servidor expone información públicamente mediante mensajes o interfaces.
+
