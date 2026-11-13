@@ -46,3 +46,10 @@ No se pudo ejecutar `dotnet build` con este paquete porque el ZIP recibido no in
 - Se corrigió `HerosModPanel.AdaptedFeatures.cs`: el método `KillOwnedProjectilesLocal()` había quedado fuera de la clase parcial por una llave de cierre anticipada.
 - Ahora tanto el alcance extendido como la limpieza manual de proyectiles están dentro de `HerosModPanel`, y se añadió la importación explícita de `System` para `Math` y `ReferenceEquals`.
 - Esta corrección evita un error de estructura de C#; todavía debe validarse con la compilación completa del proyecto.
+
+## Cuarta pasada: restauración del límite de invocaciones
+
+- Se mejoró **Minions infinitos** para guardar el valor original de `Player.maxMinions` antes de elevarlo temporalmente a 9999.
+- Al apagar la función, ejecutar el apagado global o cambiar de personaje, HERO restaura el valor que tenía ese personaje.
+- La interfaz, `.toggle minions` y `.minions` ahora pasan por el mismo método para evitar estados divergentes.
+- Esta mejora evita que el límite quede permanentemente alterado después de desactivar la opción. El comportamiento en multijugador sigue sujeto a las validaciones del servidor.
