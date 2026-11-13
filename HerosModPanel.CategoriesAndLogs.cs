@@ -62,9 +62,11 @@ internal static partial class HerosModPanel
         int cols = 2;
         int width = (panel.Width - Pad * 2 - 8) / cols;
         int baseY = y;
+        int actionRows = 0;
         void ActionButton(string label, string command, int index)
         {
             int row = index / cols;
+            actionRows = Math.Max(actionRows, row + 1);
             int col = index % cols;
             Rectangle rect = new(panel.X + Pad + col * (width + 8), baseY + row * 31, width, 27);
             if (DrawButton(sb, pixel, rect, label, mouse, new Color(120, 75, 55)))
@@ -74,6 +76,7 @@ internal static partial class HerosModPanel
         void ToggleButton(string label, string feature, bool current, int index)
         {
             int row = index / cols;
+            actionRows = Math.Max(actionRows, row + 1);
             int col = index % cols;
             Rectangle rect = new(panel.X + Pad + col * (width + 8), baseY + row * 31, width, 27);
             if (DrawButton(sb, pixel, rect, label + (current ? "  [ON]" : "  [OFF]"), mouse,
@@ -135,7 +138,7 @@ internal static partial class HerosModPanel
                 ToggleButton("Reducir proyectiles", "projectiles", antiLagProjectilesEnabled, 3);
                 break;
         }
-        y += 150;
+        y += Math.Max(150, actionRows * 31 + 12);
         DrawSectionHeader(sb, panel, ref y, "CONSOLA RÁPIDA");
         string[] quick = { ".cheats", ".status", ".report", ".diagnostics", ".pos", ".players", ".logstatus", ".helpall" };
         int qWidth = (panel.Width - Pad * 2 - 7 * 4) / 8;
