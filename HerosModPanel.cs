@@ -513,6 +513,8 @@ internal static partial class HerosModPanel
         flyEnabled = false;
         radialProjectileMode = false;
         SetInfiniteMinions(false);
+        SetNoFallDamage(false);
+        SetNoKnockback(false);
         lifeLockEnabled = false;
         defenseOverrideEnabled = false;
         antiLagEnabled = false;
@@ -627,8 +629,8 @@ internal static partial class HerosModPanel
         // Adaptaciones locales de cheats básicos de la referencia: solo afectan al personaje local.
         if (local != null && local.active && !local.dead)
         {
-            if (noFallDamageEnabled) local.noFallDmg = true;
-            if (noKnockbackEnabled) local.noKnockback = true;
+            ApplyNoFallDamage();
+            ApplyNoKnockback();
             if (infiniteBreathEnabled) local.breath = local.breathMax;
             if (antiDebuffEnabled)
             {
@@ -5515,8 +5517,8 @@ internal static partial class HerosModPanel
                     switch (feature)
                     {
                         case "reach": extendedReachEnabled = ToggleFeature(extendedReachEnabled); ApplyExtendedReach(); break;
-                        case "nofall": noFallDamageEnabled = ToggleFeature(noFallDamageEnabled); break;
-                        case "noknockback": noKnockbackEnabled = ToggleFeature(noKnockbackEnabled); break;
+                        case "nofall": SetNoFallDamage(ToggleFeature(noFallDamageEnabled)); break;
+                        case "noknockback": SetNoKnockback(ToggleFeature(noKnockbackEnabled)); break;
                         case "antidebuff": antiDebuffEnabled = ToggleFeature(antiDebuffEnabled); break;
                         case "breath": infiniteBreathEnabled = ToggleFeature(infiniteBreathEnabled); break;
                         case "god":
