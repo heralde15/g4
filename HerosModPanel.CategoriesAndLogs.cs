@@ -103,7 +103,9 @@ internal static partial class HerosModPanel
             case HeroCheatGroup.Movimiento:
                 ToggleButton("Vuelo libre", "fly", flyEnabled, 0);
                 ToggleButton("Modo fantasma visual", "ghost", ghostModeEnabled, 1);
-                ActionButton("Curar / restaurar", ".heal", 2);
+                ToggleButton("Noclip", "noclip", noclipEnabled, 2);
+                ActionButton("Teletransportar al cursor", ".mousetp", 3);
+                ActionButton("Curar / restaurar", ".heal", 4);
                 break;
             case HeroCheatGroup.Combate:
                 ToggleButton("God Mode local", "god", godmodeEnabled, 0);
@@ -125,7 +127,9 @@ internal static partial class HerosModPanel
                 ToggleButton("Tienda NPC gratis", "shopfree", npcShopFreeEnabled, 0);
                 ToggleButton("Suerte aumentada", "luck", luckBoostEnabled, 1);
                 ToggleButton("Auto eliminar ganchos", "autokillhooks", autoKillHooksEnabled, 2);
-                ActionButton("Revelar mapa local", ".revealmap", 3);
+                ToggleButton("Auto Butcher (SP)", "autobutcher", autoButcherEnabled, 3);
+                ActionButton("Butcher NPC hostiles (SP)", ".butcher", 4);
+                ActionButton("Revelar mapa local", ".revealmap", 5);
                 ActionButton("Eliminar objetos del suelo", ".clearitems", 4);
                 ToggleButton("Auto limpiar objetos (SP)", "autoclearitems", autoClearWorldItemsEnabled, 5);
                 break;
