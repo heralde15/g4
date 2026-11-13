@@ -520,6 +520,9 @@ internal static partial class HerosModPanel
         SetNoKnockback(false);
         forcedEquipsEnabled = false;
         StopAutoFish();
+        SetNoclip(false);
+        autoButcherEnabled = false;
+        autoButcherTimer = 0;
         noCombatIFramesEnabled = false;
         lifeLockEnabled = false;
         defenseOverrideEnabled = false;
@@ -633,6 +636,8 @@ internal static partial class HerosModPanel
         ApplyExtendedReach();
         UpdateAdaptedUtilityFeatures();
         UpdateAutoFish();
+        UpdateNoclip();
+        UpdateAutoButcher();
 
         // Adaptaciones locales de cheats básicos de la referencia: solo afectan al personaje local.
         if (local != null && local.active && !local.dead)
@@ -5338,6 +5343,8 @@ internal static partial class HerosModPanel
             ".autokillhooks" => "autokillhooks",
             ".forceequips" => "forceequips",
             ".autofish" => "autofish",
+            ".noclip" => "noclip",
+            ".autobutcher" => "autobutcher",
             _ => string.Empty
         };
         if (directFeature.Length > 0)
@@ -5360,7 +5367,7 @@ internal static partial class HerosModPanel
                 break;
             case ".help":
             case ".ayuda":
-                commandConsoleOutput = ".helpall = lista completa · .toggle <función> [on/off] · atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute  .shopfree .autoclearitems .autokillhooks .autofish [on/off] · .hudpos <posición> · .buff <ID> [segundos] · .log [on/off] · .logall · .logworld · .logcombat · .logsystem · .lognpc · .logperformance · .logitems · .logfile · .logstatus · .logclear · .help2";
+                commandConsoleOutput = ".helpall = lista completa · .toggle <función> [on/off] · atajos: .reach .nofall .noknockback .antidebuff .breath .minions .lifelock .luck .antilag .effects .projectiles .fps .mute  .shopfree .autoclearitems .autokillhooks .autofish .noclip .autobutcher [on/off] · .mousetp · .maptp <tileX> <tileY> · .butcher · .hudpos <posición> · .buff <ID> [segundos] · .log [on/off] · .logall · .logworld · .logcombat · .logsystem · .lognpc · .logperformance · .logitems · .logfile · .logstatus · .logclear · .help2";
                 break;
             case ".log":
             case ".eventlog":
@@ -5542,7 +5549,7 @@ internal static partial class HerosModPanel
                 {
                     if (parts.Length < 2)
                     {
-                        commandConsoleOutput = "Uso: .toggle <god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems|autokillhooks|noiframes|forceequips|autofish> [on/off]";
+                        commandConsoleOutput = "Uso: .toggle <god|reach|nofall|noknockback|antidebuff|breath|fly|ghost|minions|lifelock|luck|antilag|effects|projectiles|fps|mute|shopfree|autoclearitems|autokillhooks|noiframes|forceequips|autofish|noclip|autobutcher> [on/off]";
                         break;
                     }
                     string feature = argument;
@@ -5563,6 +5570,17 @@ internal static partial class HerosModPanel
                             autoFishEnabled = ToggleFeature(autoFishEnabled);
                             if (autoFishEnabled) autoFishRodSlot = -1;
                             else StopAutoFish();
+                            break;
+                        case "noclip": SetNoclip(ToggleFeature(noclipEnabled)); break;
+                        case "autobutcher":
+                            if (Main.netMode != 0 && toggleRequestedState != false)
+                            {
+                                commandConsoleOutput = "Auto Butcher bloqueado fuera de un jugador.";
+                                blocked = true;
+                                break;
+                            }
+                            autoButcherEnabled = ToggleFeature(autoButcherEnabled);
+                            autoButcherTimer = 0;
                             break;
                         case "autokillhooks":
                             autoKillHooksEnabled = ToggleFeature(autoKillHooksEnabled);
@@ -5689,6 +5707,20 @@ internal static partial class HerosModPanel
                 forcedEquipItems.Clear();
                 forcedEquipsEnabled = false;
                 commandConsoleOutput = "Lista Forced Equips vaciada y función desactivada.";
+                break;
+            case ".mousetp":
+            case ".mouseteleport":
+                TeleportToMouse();
+                break;
+            case ".maptp":
+            case ".mapteleport":
+                if (parts.Length < 3 || !int.TryParse(parts[1], out int mapTileX) || !int.TryParse(parts[2], out int mapTileY))
+                    commandConsoleOutput = "Uso: .maptp <tileX> <tileY> (coordenadas del mapa en tiles).";
+                else
+                    TeleportToMapCoordinates(mapTileX, mapTileY);
+                break;
+            case ".butcher":
+                commandConsoleOutput = "NPC hostiles eliminados: " + ButcherHostileNPCsLocal() + ".";
                 break;
             case ".clearitems":
             case ".deleteitems":
