@@ -47,18 +47,29 @@ internal static partial class HerosModPanel
             if (!info.Exists || info.Length <= 0 || info.Length > 20 * 1024 * 1024)
                 throw new InvalidDataException("El GIF debe pesar entre 1 byte y 20 MB.");
 
+            // Identifica dimensiones y fotogramas antes de decodificar para rechazar GIF enormes.
+            ImageInfo imageInfo = SixLabors.ImageSharp.Image.Identify(path);
+            if (imageInfo == null)
+                throw new InvalidDataException("No se pudo identificar el GIF.");
+
+            int identifiedFrames = imageInfo.FrameMetadataCollection.Count;
+            if (imageInfo.Width < 1 || imageInfo.Height < 1 || imageInfo.Width > 2048 || imageInfo.Height > 2048)
+                throw new InvalidDataException("El GIF no puede superar 2048 × 2048.");
+            if (identifiedFrames < 2)
+                throw new InvalidDataException("El archivo GIF no contiene animación.");
+            if (identifiedFrames > 50 || (long)imageInfo.Width * imageInfo.Height * identifiedFrames > 24000000L)
+                throw new InvalidDataException("El GIF tiene demasiados fotogramas o consume demasiada memoria (máximo 50 fotogramas y 24 MP acumulados).");
+
             using (Image<Rgba32> image = SixLabors.ImageSharp.Image.Load<Rgba32>(path))
             {
                 int width = image.Width;
                 int height = image.Height;
                 int frameCount = image.Frames.Count;
 
-                if (width < 1 || height < 1 || width > 2048 || height > 2048)
-                    throw new InvalidDataException("El GIF no puede superar 2048 × 2048.");
-                if (frameCount < 2)
-                    throw new InvalidDataException("El archivo GIF no contiene animación.");
-                if (frameCount > 50 || (long)width * height * frameCount > 24000000L)
-                    throw new InvalidDataException("El GIF tiene demasiados fotogramas o consume demasiada memoria (máximo 50 fotogramas y 24 MP acumulados).");
+                if (width < 1 || height < 1 || width > 2048 || height > 2048 ||
+                    frameCount < 2 || frameCount > 50 ||
+                    (long)width * height * frameCount > 24000000L)
+                    throw new InvalidDataException("El GIF cambió durante la lectura o supera los límites de memoria.");
 
                 for (int i = 0; i < frameCount; i++)
                 {
