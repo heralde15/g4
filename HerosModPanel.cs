@@ -5469,10 +5469,11 @@ internal static partial class HerosModPanel
             case ".time":
             case ".hora":
                 {
-                    double ticks = Main.time;
-                    string clock = Main.dayTime
-                        ? TimeSpan.FromSeconds((int)(ticks / 60.0)).ToString(@"hh\:mm")
-                        : TimeSpan.FromSeconds((int)((ticks + 54000.0) / 60.0)).ToString(@"hh\:mm");
+                    double gameHours = Main.dayTime
+                        ? 4.5 + (Main.time / 54000.0) * 15.0
+                        : 19.5 + (Main.time / 32400.0) * 9.0;
+                    gameHours %= 24.0;
+                    string clock = TimeSpan.FromHours(gameHours).ToString(@"hh\:mm");
                     commandConsoleOutput = "MUNDO: " + (Main.dayTime ? "Día" : "Noche") + " · " +
                         clock + " · " + (Main.raining ? "Lluvia" : "Sin lluvia") +
                         (Main.eclipse ? " · Eclipse" : string.Empty) +
