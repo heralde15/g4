@@ -177,10 +177,52 @@ internal static partial class HerosModPanel
             WorldItem worldItem = Main.item[i];
             if (worldItem == null || !worldItem.active)
                 continue;
-            worldItem.active = false;
-            removed++;
+
+            // WorldItem.active es de solo lectura en esta variante. Accedemos al Item
+            // contenido mediante reflexión y usamos su método TurnToAir cuando exista.
+            object containedItem = GetWorldItemContainedItem(worldItem);
+            if (containedItem == null)
+                continue;
+
+            MethodInfo turnToAir = containedItem.GetType().GetMethod(
+                "TurnToAir",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                Type.EmptyTypes,
+                null);
+            if (turnToAir != null)
+            {
+                turnToAir.Invoke(containedItem, null);
+                removed++;
+                continue;
+            }
+
+            FieldInfo activeField = containedItem.GetType().GetField(
+                "active",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (activeField != null && activeField.FieldType == typeof(bool))
+            {
+                activeField.SetValue(containedItem, false);
+                removed++;
+            }
         }
         return removed;
+    }
+
+    private static object GetWorldItemContainedItem(WorldItem worldItem)
+    {
+        Type type = worldItem.GetType();
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+        FieldInfo field = type.GetField("item", flags) ?? type.GetField("_item", flags);
+        if (field != null)
+            return field.GetValue(worldItem);
+
+        PropertyInfo property = type.GetProperty("item", flags) ?? type.GetProperty("Item", flags);
+        if (property != null && property.GetIndexParameters().Length == 0 && property.GetMethod != null)
+            return property.GetValue(worldItem);
+
+        return null;
     }
 
     private static bool RevealLocalMap()
