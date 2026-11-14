@@ -169,53 +169,117 @@ internal static partial class HerosModPanel
     private static void ImportWorldSchematicExtended()
     {
         if (!worldPos1.HasValue) { SetStatus("Marca POS1 antes de importar."); return; }
+
+        string path;
+        int width;
+        int height;
+        bool[] hasTiles;
+        ushort[] tileTypes;
+        ushort[] walls;
+        byte[] liquidTypes;
+        byte[] liquidAmounts;
+
+        // Primero se valida y carga TODO el archivo en memoria. Si está corrupto,
+        // no se modifica el mundo ni se pierde el Undo de la operación anterior.
         try
         {
-            string path = GetExtendedSchematicPath();
+            path = GetExtendedSchematicPath();
             if (!File.Exists(path)) { SetStatus("No existe " + Path.GetFileName(path)); return; }
-            int width, height;
-            using (var reader = new BinaryReader(File.OpenRead(path)))
+
+            using var reader = new BinaryReader(File.OpenRead(path));
+            if (reader.ReadString() != "HERO_WORLD_EDIT_2")
+                throw new InvalidDataException("Formato HWSX no reconocido.");
+
+            width = reader.ReadInt32();
+            height = reader.ReadInt32();
+            long cellCount = (long)width * height;
+            if (width < 1 || height < 1 || cellCount > 250000)
+                throw new InvalidDataException("Dimensiones inválidas o esquema demasiado grande.");
+
+            int startX = worldPos1.Value.X;
+            int startY = worldPos1.Value.Y;
+            if (startX < 1 || startY < 1 ||
+                (long)startX + width >= Main.maxTilesX - 1 ||
+                (long)startY + height >= Main.maxTilesY - 1)
+                throw new InvalidDataException("El esquema queda fuera de los límites del mundo.");
+
+            long expectedBytes = cellCount * 7L;
+            if (reader.BaseStream.Length - reader.BaseStream.Position != expectedBytes)
+                throw new InvalidDataException("El archivo está incompleto o contiene datos adicionales.");
+
+            int count = checked((int)cellCount);
+            hasTiles = new bool[count];
+            tileTypes = new ushort[count];
+            walls = new ushort[count];
+            liquidTypes = new byte[count];
+            liquidAmounts = new byte[count];
+
+            for (int i = 0; i < count; i++)
             {
-                if (reader.ReadString() != "HERO_WORLD_EDIT_2") throw new InvalidDataException("Formato HWSX no reconocido.");
-                width = reader.ReadInt32(); height = reader.ReadInt32();
-                if (width < 1 || height < 1 || (long)width * height > 250000 ||
-                    worldPos1.Value.X < 1 || worldPos1.Value.Y < 1 ||
-                    worldPos1.Value.X + width >= Main.maxTilesX - 1 || worldPos1.Value.Y + height >= Main.maxTilesY - 1)
-                    throw new InvalidDataException("Dimensiones inválidas o esquema fuera del mundo.");
-                long expected = (long)width * height * 7L;
-                if (reader.BaseStream.Length - reader.BaseStream.Position != expected)
-                    throw new InvalidDataException("El archivo está incompleto o contiene datos adicionales.");
+                bool hasTile = reader.ReadBoolean();
+                ushort tileType = reader.ReadUInt16();
+                ushort wall = reader.ReadUInt16();
+                byte liquidType = reader.ReadByte();
+                byte liquidAmount = reader.ReadByte();
+
+                if (hasTile && tileType >= TileID.Count)
+                    throw new InvalidDataException("El esquema contiene un Tile ID fuera de rango.");
+                if (wall >= WallID.Count)
+                    throw new InvalidDataException("El esquema contiene un Wall ID fuera de rango.");
+                if (liquidType > (byte)LiquidID.Shimmer)
+                    throw new InvalidDataException("El esquema contiene un tipo de líquido desconocido.");
+
+                hasTiles[i] = hasTile;
+                tileTypes[i] = tileType;
+                walls[i] = wall;
+                liquidTypes[i] = liquidType;
+                liquidAmounts[i] = liquidAmount;
+            }
+        }
+        catch (Exception ex)
+        {
+            SetStatus("No se importó HWSX; el mundo no se modificó: " + ex.Message);
+            return;
+        }
+
+        // El archivo ya está completamente validado: ahora sí se inicia una
+        // nueva operación Undo y se aplica el esquema.
+        worldEditUndo.Clear();
+        int changed = 0;
+        try
+        {
+            int startX = worldPos1.Value.X;
+            int startY = worldPos1.Value.Y;
+            for (int yy = 0; yy < height; yy++)
+            for (int xx = 0; xx < width; xx++)
+            {
+                int index = yy * width + xx;
+                int wx = startX + xx;
+                int wy = startY + yy;
+                Tile tile = Main.tile[wx, wy];
+                if (tile == null) continue;
+
+                worldEditUndo.Add((wx, wy, (Tile)tile.Clone()));
+                if (tile.HasTile) WorldGen.KillTile(wx, wy, false, false, true);
+                if (hasTiles[index])
+                    WorldGen.PlaceTile(wx, wy, tileTypes[index], true, true);
+
+                tile.WallType = walls[index];
+                tile.LiquidType = liquidTypes[index];
+                tile.LiquidAmount = liquidAmounts[index];
+                changed++;
             }
 
-            worldEditUndo.Clear();
-            int changed = 0;
-            using (var reader = new BinaryReader(File.OpenRead(path)))
-            {
-                reader.ReadString(); reader.ReadInt32(); reader.ReadInt32();
-                for (int yy = 0; yy < height; yy++)
-                for (int xx = 0; xx < width; xx++)
-                {
-                    bool hasTile = reader.ReadBoolean();
-                    ushort tileType = reader.ReadUInt16();
-                    ushort wall = reader.ReadUInt16();
-                    byte liquidType = reader.ReadByte();
-                    byte liquidAmount = reader.ReadByte();
-                    int wx = worldPos1.Value.X + xx, wy = worldPos1.Value.Y + yy;
-                    Tile tile = Main.tile[wx, wy];
-                    if (tile == null) continue;
-                    worldEditUndo.Add((wx, wy, (Tile)tile.Clone()));
-                    if (tile.HasTile) WorldGen.KillTile(wx, wy, false, false, true);
-                    if (hasTile && tileType < TileID.Count) WorldGen.PlaceTile(wx, wy, tileType, true, true);
-                    tile.WallType = wall < WallID.Count ? wall : (ushort)0;
-                    tile.LiquidType = liquidType <= LiquidID.Shimmer ? liquidType : (byte)LiquidID.Water;
-                    tile.LiquidAmount = liquidAmount;
-                    changed++;
-                }
-            }
             worldSchematicStatus = "Importado esquema avanzado: " + width + " × " + height;
-            SetStatus("Esquema HWSX importado: " + changed + " tiles." + GetWorldEditAuthorityNotice());
+            SetStatus("Esquema HWSX importado: " + changed + " tiles. Undo disponible." + GetWorldEditAuthorityNotice());
         }
-        catch (Exception ex) { worldEditUndo.Clear(); SetStatus("Error al importar HWSX: " + ex.Message); }
+        catch (Exception ex)
+        {
+            // No borrar el historial: permite restaurar todas las celdas que
+            // llegaron a modificarse antes de que se produjera el error.
+            SetStatus("La importación se interrumpió: " + ex.Message +
+                ". Se conservaron " + worldEditUndo.Count + " cambios para Undo.");
+        }
     }
 
     private static void ImportWorldEditImage()
