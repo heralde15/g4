@@ -3,8 +3,7 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria.ID;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using SkiaSharp;
 
 namespace Terraria.Unified.Features;
 
@@ -292,7 +291,8 @@ internal static partial class HerosModPanel
         {
             var info = new FileInfo(worldEditImagePath);
             if (info.Length > 20L * 1024 * 1024) throw new InvalidDataException("La imagen supera 20 MB.");
-            using Image<Rgba32> image = Image.Load<Rgba32>(worldEditImagePath);
+            using SKBitmap image = SKBitmap.Decode(worldEditImagePath)
+                ?? throw new InvalidDataException("SkiaSharp no pudo decodificar la imagen.");
             if (image.Width < 1 || image.Height < 1 || image.Width > 256 || image.Height > 256)
                 throw new InvalidDataException("La imagen debe medir como máximo 256 × 256 píxeles.");
             if (!int.TryParse(worldTileType, out int tileId) || tileId < 0 || tileId >= TileID.Count)
@@ -308,8 +308,8 @@ internal static partial class HerosModPanel
             for (int py = 0; py < image.Height; py++)
             for (int px = 0; px < image.Width; px++)
             {
-                Rgba32 pixelColor = image[px, py];
-                if (pixelColor.A < 24) continue;
+                SKColor pixelColor = image.GetPixel(px, py);
+                if (pixelColor.Alpha < 24) continue;
                 int wx = originX + px, wy = originY + py;
                 Tile tile = Main.tile[wx, wy];
                 if (tile == null) continue;
