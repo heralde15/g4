@@ -3555,8 +3555,8 @@ internal static partial class HerosModPanel
         int bx = panel.X + Pad;
         int bw = (Width - Pad * 2 - 8) / 2;
         int navGap = 4;
-        int navW = (Width - Pad * 2 - navGap * 5) / 6;
-        string[] pageNames = { "Selección", "Bloques", "Paredes/ID", "Copiar/Líquidos", "Archivos", "Catálogo IDs" };
+        int navW = (Width - Pad * 2 - navGap * 6) / 7;
+        string[] pageNames = { "Selección", "Bloques", "Paredes/ID", "Copiar/Líquidos", "Archivos", "Catálogo IDs", "Pinceles/Imagen" };
         for (int page = 0; page < pageNames.Length; page++)
         {
             var navRect = new Rectangle(bx + page * (navW + navGap), y, navW, 25);
@@ -3745,6 +3745,10 @@ internal static partial class HerosModPanel
                 ? "Borrar por ID: en Paredes/ID escribe el ID en Wall ID y pulsa Quitar paredes por ID."
                 : "Borrar por ID: en Bloques escribe el ID en ID objetivo y pulsa Quitar bloques por ID objetivo.",
                 new Vector2(bx, y), new Color(190, 205, 225), 0.58f);
+        }
+        else if (worldEditUiPage == 6)
+        {
+            DrawWorldEditExtendedTab(sb, pixel, panel, ref y, mouse);
         }
     }
 
@@ -6472,6 +6476,8 @@ internal static partial class HerosModPanel
             bookmarkNameInput = Main.GetInputText(bookmarkNameInput);
         else if (activeField == 70)
             uiBackgroundImagePath = Main.GetInputText(uiBackgroundImagePath ?? string.Empty);
+        else if (activeField == 72)
+            worldEditImagePath = Main.GetInputText(worldEditImagePath ?? string.Empty);
 
         if (Main.inputTextEnter || Main.inputTextEscape)
         {
